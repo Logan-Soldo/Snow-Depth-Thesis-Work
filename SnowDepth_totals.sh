@@ -11,13 +11,13 @@
 #5.  Latitude of 89x89 cell (decimal degrees)
 #6.  Maximum elevation of stations reporting snowfall in cell (m)
 #7.  Minimum elevation of stations reporting snowfall in cell (m)
-#8.  Mean snow depth of stations reporting snowfall in cell (mm)
-#9.  Median snow depth of stations reporting snowfall in cell (mm)
+#8.  Mean snow depth of stations reporting snowfall in cell (cm)
+#9.  Median snow depth of stations reporting snowfall in cell (cm)
 #10. Number of stations reporting in file
-#11. Number of stations reporting > 10mm snowfall in cell
-#12. Number of stations reporting > 25mm snowfall in cell
-#13. Number of stations reporting > 50mm snowfall in cell
-#14. Number of stations reporting > 100mm snowfall in cell
+#11. Number of stations reporting > 10cm snowfall in cell
+#12. Number of stations reporting > 25cm snowfall in cell
+#13. Number of stations reporting > 50cm snowfall in cell
+#14. Number of stations reporting > 100cm snowfall in cell
 #15. NOAA cell area
 #16. NOAA snow cover flag (1=snow covered) (not included)
  
@@ -36,10 +36,11 @@ outputdir=/mnt/u/Research/SnowDepth_Data/Outputs
 
 
 start_time=$(date +%s)
-echo $start_time
+#echo $start_time
 
  
-list="2741 2740 2739 2738 2737 2641 2640 2639 2638 2541 2540 2539 2538 2441 2440 2439 2438 2341 2340 2339  2241 2240 2141"
+#list="2741 2740 2739 2738 2737 2641 2640 2639 2638 2541 2540 2539 2538 2441 2440 2439 2438 2341 2340 2339  2241 2240 2141"
+list="2340 2439 2440 2540 2541 2641 2739 2740 2741 2737 2638 2539 2640 2341 2538"  # missing greater than 25% of data.
 
 for i in {12..27}
 do
@@ -114,5 +115,6 @@ EOF
 	
 
 #rm -f data1.bin
-
-echo "END OF SCRIPT at $(date)"
+end_time=$(date +%s)
+runtime=$((($(date +%s)-$start_time)/60))
+echo "END OF SCRIPT at $(date) in $runtime minutes"
