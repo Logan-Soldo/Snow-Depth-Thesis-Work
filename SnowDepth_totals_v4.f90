@@ -206,7 +206,7 @@ write(*,nml=cdh_nml)
 								if (mean_depth .gt. 0) then
 									zero_counter(k) = zero_counter(k) + 1
 								endif
-								if (mean_depth .ge. 760) then        ! Checking if depth is greater than 7.6cm. (data is in mm)
+								if (mean_depth .ge. 7.6) then        ! Checking if depth is greater than 7.6cm. (data is in mm)
 									annCounter_76 = annCounter_76 + 1
 									counter_76(k) = counter_76(k) + 1								
 								endif
