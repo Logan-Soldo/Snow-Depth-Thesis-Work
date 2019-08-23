@@ -33,26 +33,25 @@ outputdir=/mnt/e/School/Thesis/SnowDepth_Data/Outputs
 start_time=$(date +%s)
 echo $(date)
 
-# list="2741 2740 2739 2738 2737 2641 2640 2639 2638 2541 2540 2539 2538 2441 2440 2439 2438 2341 2340 2339  2241 2240 2141" 
-list="2741 2538 2441 2440 2439 2438 2341 2340 2339 2241 2240 2141" 
-# IFS=' '
-#files=$datadir/*.txt
+ list="2741 2740 2739 2738 2737 2641 2640 2639 2638 2541 2540 2539 2538 2441 2440 2439 2438 2341 2340 2339  2241 2240 2141" 
+ # files=$datadir/*.txt 
+# # IFS=' '
 
-# i = $(list:0:2)
-# j = $(list:2:2)
 
-for string in $list
-	do
-		for i in  ${string:0:2}
-			do
-			for j in ${string:2:2}
-				do 
-		# i=${string:0:2}
-		# j=${string:2:2}
+    for string in $list
+	 do
+	  # do
+	  i=${string:0:2}
+	  j=${string:2:2}
+		# for i in ${list:0:2}
+			# do
+			# for j in ${list:2:2}
+				# do 
+	
 
 #		 mkdir -p /mnt/e/School/Thesis/Python_Code/Snowfall_Data/1960s/Outputs
-		 mkdir -p $outputdir/$i$j
-
+		 mkdir -p $outputdir/$i$j/
+	 done
 
 
 			
@@ -61,24 +60,39 @@ for string in $list
 
 	#	   do
 #			  filename=`basename $filein|sed 's/\.txt//'`
-			fileout=$outputdir/$i$j/
+			fileout=$outputdir/
+			echo $fileout
+   
+   
+# This function will find a matching i and j then extract to file.
+awkarray=$(
+  # substitute space for newline
+  <<<$list tr ' ' '\n' | 
+  # remove empty newlines
+  sed '/^$/d' | 
+  # add 'a[' to the beginning of the line
+  # and add ']' to the ending of the line
+  # so we have a[number] a[anothernumber] etc.
+  sed 's/^/a[/; s/$/]/'
+)
+awk -vfileout="$fileout" '
+  BEGIN {'"$awkarray"'}
+  $3 $2 in a { 
+    print $0 > fileout $3 "_" $2 "_SnowDepth.txt"
+  }
+' "$datadir"/*.txt
 
 
-
-
-	  #run the excutable
-#	 ./$pgm
-#	  awk '$2==$i {print FILENAME $0}' *.txt >"${fileout}${i}_${j}_Snowfall_1960s.txt"
-#	  sort -t -k 2 -k 3 $datadir/*.txt
-	  awk -v i=$i -v j=$j '$2==j && $3==i {print $0}' $datadir/*.txt >"${fileout}${i}_${j}_SnowDepth.txt"   # This function will find a matching i and j then extract to file.
-
-	
-		echo $i
-		echo $j
+for string in $list	
+do
+	 i=${string:0:2}
+	 j=${string:2:2}
+	mv /$outputdir/${i}_${j}_SnowDepth.txt /$outputdir/$i$j/${i}_${j}_SnowDepth.txt
+done
 		
 #		cat $outputdir/$i$j/*.txt > $outputdir/$i$j/${i}${j}_Snowfall.txt
 		
-		echo ${i}${j}_SnowDepth.txt
+	#	echo ${i}${j}_SnowDepth.txt
 		
 	  if [ $? -ne 0 ]; then
 		echo "$run finished with error"
@@ -90,9 +104,7 @@ for string in $list
 	  
 		   
 
-		done
-		done
-		done
+
 
 
 #rm -f data1.bin
