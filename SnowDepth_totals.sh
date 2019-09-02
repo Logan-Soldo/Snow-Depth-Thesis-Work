@@ -40,7 +40,7 @@ start_time=$(date +%s)
 echo $start_time
 
  
-Blacklist="2741 2538 2441 2440 2439 2438 2341 2340 2339 2241 2240 2141" 
+Blacklist="2741 2740 2739 2641 2541 2538 2441 2440 2439 2438 2341 2340 2339 2241 2240 2141" 
 
 for i in {12..27}
 do
@@ -85,12 +85,13 @@ inputfile2="${filein2}",
 outputfile="${fileout}${i}${j}_SplitDate.txt",
 outputfile2="${fileout}${i}${j}_CountDate.txt",
 outputfile3="${fileout}${i}${j}_MeanSnowDepth.txt",
-outputfile4="${fileout}${i}${j}_SDQuality.txt",
-outputfile5="${fileout2}${i}${j}_PercentMiss.txt",
-outputfile6="${fileout}${i}${j}_DaySnowDepth.txt",
-outputfile7="${fileout}${i}${j}_MonthlyAverage.txt",
-outputfile8="${fileout}${i}${j}_SeasonalSnowDepth.txt",
-outputfile9="${fileout3}${i}${j}_Junk.txt",
+outputfile4="${fileout}${i}${j}_76SnowDepth.txt",
+outputfile5="${fileout}${i}${j}_SDQuality.txt",
+outputfile6="${fileout2}${i}${j}_PercentMiss.txt",
+outputfile7="${fileout}${i}${j}_DaySnowDepth.txt",
+outputfile8="${fileout}${i}${j}_MonthlyAverage.txt",
+outputfile9="${fileout}${i}${j}_SeasonalSnowDepth.txt",
+outputfile10="${fileout3}${i}${j}_Junk.txt",
 /
 EOF
 
@@ -122,4 +123,6 @@ EOF
 
 #rm -f data1.bin
 
-echo "END OF SCRIPT at $(date)"
+end_time=$(date +%s)
+runtime=$((($(date +%s)-$start_time)/60))
+echo "END OF SCRIPT at $(date) in $runtime minutes"
