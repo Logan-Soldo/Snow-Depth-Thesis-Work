@@ -27,13 +27,15 @@
 	  integer max_elevation, min_elevation, Depth_mean(52),start_year,next_year,previous_year
 	  integer median_depth,mean_depth, NOAA_area,julian,counter,Depth_median(52),Depth_median_k(52)
 	  integer snwf_NOAA_area,snwf_mean,snwf_median,previous_snwd,snwf_max_elevation
-	  integer snwf_min_elevation,zero_depth,First10day(52)
+	  integer snwf_min_elevation,zero_depth,First7day(52),ZeroReporting(52)
 	  integer station_num,station_10,station_25,station_50,station_100
 	  integer snwf_station_num,snwf_station_10,snwf_station_25,snwf_station_50,snwf_station_100
 	  integer Fall_total(52), Winter_total(52), Spring_total(52),Winter_total_k(52)
 	  integer Next_fall(52),Next_winter(52),study_year,count_day, max_mean(52),min_mean(52)
 	  integer max_count(52), min_count(52),max_reporting(52),total_max_reporting
-	  integer MaxDaysAbove76(52), DaysAbove76,Avg10day
+	  integer MaxDaysAbove76(52), DaysAbove76,AvgFst7day,AvgLst7day,LastDay(52),Last7day(52)
+	  integer TotalZeroReportYears,Reporting25(52),TotalReporting25,abs_max_elevation(52)
+	  integer AbsAverageElevation,abs_min_elevation(52), AvgElevation(52)
 !	  integer station_num,station_10,station_25,station_50,station_100
 	  real  longitude,latitude,yearReal,day_mean(365),day_median(365),mean_sum(365),median_sum(365)
 	  real  zero_percent(52),zero_counter(52),counter_76(52),percent_76(52),miss_counter(52),miss_percent(52)
@@ -102,15 +104,25 @@ write(*,nml=cdh_nml)
 		miss_percent(k) = 0.0
 		
 		MaxDaysAbove76(k) = 0
-		First10day(k) = 0
+		First7day(k) = 0
+		LastDay(k) = 0
+		Last7day(k) = 0
+		
+		abs_max_elevation(k) = 0
+		abs_min_elevation(k) = 0
+		AvgElevation(k) = 0
 		
 	    max_count(k) = 0
 	    min_count(k) = 0
-		do l = 1,365
-			day_mean(l) = 0
-			day_median(l) = 0
-			mean_sum(l) = 0
-			median_sum(l) = 0
+		
+		ZeroReporting(k) = 0
+		Reporting25(k) = 0
+		
+			do l = 1,365
+				day_mean(l) = 0
+				day_median(l) = 0
+				mean_sum(l) = 0
+				median_sum(l) = 0
 			enddo
 	enddo
 ! Extract the datestring to yyyy,mm,dd
@@ -161,7 +173,7 @@ write(*,nml=cdh_nml)
 					do n = 1,52
 						do p = 1,365				
 							count_day = count_day + 1
-							if ((snwf_mean .EQ. 0) .AND. (mean_depth .GT. previous_snwd)) then
+							if ((previous_snwd .NE. -99999) .AND. (snwf_mean .EQ. 0) .AND. (mean_depth .GT. previous_snwd)) then
 								mean_depth = previous_snwd
 								write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
 								&mean_depth,median_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area
@@ -197,8 +209,8 @@ write(*,nml=cdh_nml)
 		rewind(25)
 
 		
-		write(30,3100) "year","SnowDepth Mean","Mean Max","Max Day","Mean Min","Min Count","Max Reporting"    !"Stations Reporting","Stations 10mm","Stations 25mm","Station 50mm","Station 100mm"
-		write(34,3410) "year","76Count","76Percent","MaxAbove76","First10day","flag"
+		write(30,3100) "year","Max Elevation","SnowDepth Mean","Mean Max","Max Day","Mean Min","Min Count","Max Reporting"    !"Stations Reporting","Stations 10mm","Stations 25mm","Station 50mm","Station 100mm"
+		write(34,3410) "year","76Count","76Percent","MaxAbove76","First7day","LastDay","Last7Days","flag"
 		write(35,3510) "year","Zero Count","Zero Percent","7.6 Count","7.6 Percent","Miss Count","Miss Percent"
 		! write(36,3610) "i","j","lat","lon","Miss Percent","Miss Count","Percent_76","Counter_76",&
 		! &"AvgMaxJulian","total_counter","max_reporting"     !percent missing is wrtitten out here. 
@@ -236,8 +248,7 @@ write(*,nml=cdh_nml)
 		Sep_Mean = 0
 		Oct_Mean = 0
 		Nov_Mean = 0
-		Dec_Mean = 0
-				
+		Dec_Mean = 0				
 		
 		do n = 1,5000	
 			read(25,1500,end=25)Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,&
@@ -304,15 +315,17 @@ write(*,nml=cdh_nml)
 									annCounter_76 = annCounter_76 + 1
 									counter_76(k) = counter_76(k) + 1
 									DaysAbove76 = DaysAbove76 + 1				! Tracking the number of days above 7.6 cm.
-									if (DaysAbove76 .EQ. 10) then
+									if (DaysAbove76 .EQ. 7) then
 										flag(k) = 1
-										First10day(k) = count_day					! Write day that first 10 days above 7.6 is reached.
+										First7day(k) = count_day					! Write day that first 7 days above 7.6 is reached.
 									endif
+									LastDay(k) = count_day
 								else
-									if (DaysAbove76 .GE. 10) then
+									if (DaysAbove76 .GE. 7) then
 										if (DaysAbove76 .GT. MaxDaysAbove76(k)) then			! if the number of days above 7.6 is greater than current max, then the maximum is replaced.	
 											MaxDaysAbove76(k) = DaysAbove76
 										endif
+										Last7day(k) = count_day - 1     ! This records the last 7 day period where snow is above 7.6 cm.
 									endif
 									DaysAbove76 = 0								! Days above is reset
 								endif
@@ -333,12 +346,17 @@ write(*,nml=cdh_nml)
 								Depth_median(k) = Depth_median(k) + median_depth
 							endif
 							
-
-							
-							
-							
-							
-							
+							if (max_elevation .ne. -99999) then
+								if (max_elevation .gt. abs_max_elevation(k)) then
+									abs_max_elevation(k) = max_elevation
+								endif
+							endif							
+							if (min_elevation .ne. -99999) then
+								if (min_elevation .lt. abs_min_elevation(k)) then
+									abs_min_elevation(k) = min_elevation
+								endif
+							endif
+														
 	!						write(200,*) year,study_year, month,day,julian,count_day,k,l,mean_depth,Depth_mean(k),Depth_mean_k(k), Depth_mean_sum(k)    
 	
 	
@@ -349,73 +367,90 @@ write(*,nml=cdh_nml)
 							&station_25,station_50,station_100,NOAA_area	
 						enddo
 						
+						if (max_reporting(k) .EQ. 0) then
+							ZeroReporting(k) = 1
+						endif
+						
+						if (max_reporting(k) .lt. (0.25*total_max_reporting)) then
+							Reporting25(k) = 1
+						endif
+						
+						AvgElevation(k) = (abs_max_elevation(k) - abs_min_elevation(k))/2  ! This gives an average for each year of the absolute max and min elevation.
 						
 						zero_percent(k) = (zero_counter(k)/365.0)*100    ! percent of year covered by snow.
 						percent_76(k) = (counter_76(k)/365.0)*100
-						miss_percent(k) = (miss_counter(k)/365.0)*100	
-
-!						write(200,*) study_year,k,l, zero_counter(k),zero_percent(k)
+						miss_percent(k) = (miss_counter(k)/365.0)*100							
 						
-						
-						write(30,3000) study_year,Depth_mean(k), max_mean(k),max_count(k),min_mean(k),min_count(k),max_reporting(k)  ! This file will only write on calculated statistics. i.e. sum, mean, max, min, standard deviation.	
-						write(34,3400) study_year,counter_76(k),percent_76(k), MaxDaysAbove76(k),First10day(k),flag(k)
+						write(30,3000) study_year,AvgElevation(k),Depth_mean(k), max_mean(k),&
+						&max_count(k),min_mean(k),min_count(k),max_reporting(k)  ! This file will only write on calculated statistics. i.e. sum, mean, max, min, standard deviation.	
+						write(34,3400) study_year,counter_76(k),percent_76(k), MaxDaysAbove76(k),First7day(k),LastDay(k),Last7day(k),flag(k)
 !						write(34,*) DaysAbove76
 						write(35,3500) study_year,zero_counter(k),zero_percent(k),counter_76(k),percent_76(k),miss_counter(k),miss_percent(k)    ! This file will be to check the quality of the data. The zero_counter could be important for number of days with snow on the ground.
 
 						study_year = study_year + 1
 
-					enddo
-					
-					
-
-					
-				endif
-		
-!			write(200,*) year,study_year, month,day,julian,count_day,k,l,mean_depth,Depth_mean(k),Depth_mean_k(k), Depth_mean_sum(k)
-
-
-			
+					enddo					
+				endif		
+!			write(200,*) year,study_year, month,day,julian,count_day,k,l,mean_depth,Depth_mean(k),Depth_mean_k(k), Depth_mean_sum(k)			
 		enddo
 
 25	   				rewind(25)					
 					total_mpercent = (miss_total/total_counter)*100         ! percent of missing data in the whole dataset is calculated here.			
 					annPercent_76 = (annCounter_76/total_counter)*100
 
-					AvgMaxCount = (sum(max_count,k))/(k-1)
-					if (AvgMaxCount .GE. 186) then
-						AvgMaxCount = AvgMaxCount - 185
-					elseif (AvgMaxCount .LE. 185) then
-						AvgMaxCount = AvgMaxCount + 180
-					endif
-					
-					sumflag = sum(flag,k)
-					if (sumflag .GT. 0) then
-						Avg10day = (sum(First10day,k))/(sumflag)
-						if (Avg10day .GE. 186) then
-							Avg10day = Avg10day - 185
-						elseif (Avg10day .LE. 185) then
-							Avg10day = Avg10day + 180
-						endif
-					else 
-						Avg10day = -99999
-					endif
-					
-					write(36,3600) i,j,latitude,longitude,total_mpercent,miss_total,annPercent_76,annCounter_76,&
-					&AvgMaxCount,Avg10day,total_counter,total_max_reporting     !percent missing is wrtitten out here. 
+! Converting count days into Julian Day.
+
+	TotalZeroReportYears = 0
+	AbsAverageElevation = 0
+
+		AvgMaxCount = (sum(max_count,k))/(k-1)
+		! if (AvgMaxCount .GE. 186) then
+			! AvgMaxCount = AvgMaxCount - 185
+		! elseif (AvgMaxCount .LE. 185) then
+			! AvgMaxCount = AvgMaxCount + 180
+		! endif
+		
+		TotalZeroReportYears = sum(ZeroReporting,k)
+		TotalReporting25 = sum(Reporting25,k)    ! Number of years when less than 25% of maximum stations in total period are reporting. 
+		
+		sumflag = sum(flag,k)
+		if (sumflag .GE. 3) then						! taking an average of less than 3 will not be benficial to the project.
+			AvgFst7day = (sum(First7day,k))/(sumflag)
+			! if (AvgFst7day .GE. 186) then
+				! AvgFst7day = AvgFst7day - 185
+			! elseif (AvgFst7day .LE. 185) then
+				! AvgFst7day = AvgFst7day + 180
+			! endif
+			AvgLst7day = (sum(Last7day,k))/(sumflag)
+			! if (AvgLst7day .GE. 186) then
+				! AvgLst7day = AvgLst7day - 185
+			! elseif (AvgLst7day .LE. 185) then
+				! AvgLst7day = AvgLst7day + 180
+			! endif						
+		else 
+			AvgFst7day = -99999
+			AvgLst7day = -99999
+		endif
+		
+		AbsAverageElevation = (sum(AvgElevation,k))/k
+		
+		write(36,3600) i,j,latitude,longitude,AbsAverageElevation,total_mpercent,miss_total,annPercent_76,annCounter_76,&
+		&AvgMaxCount,AvgFst7day,AvgLst7day,sumflag,total_counter,total_max_reporting,TotalZeroReportYears,&
+		& TotalReporting25   !	percent missing is wrtitten out here. 
 
 ! Write out the monthly averages here.
-					Jan_Mean = Jan_total/k
-					Feb_Mean = Feb_total/k
-					Mar_Mean = Mar_total/k
-					Apr_Mean = Apr_total/k
-					May_Mean = May_total/k
-					Jun_Mean = Jun_total/k
-					Jul_Mean = Jul_total/k
-					Aug_Mean = Aug_total/k
-					Sep_Mean = Sep_total/k
-					Oct_Mean = Oct_total/k
-					Nov_Mean = Nov_total/k
-					Dec_Mean = Dec_total/k
+		Jan_Mean = Jan_total/k
+		Feb_Mean = Feb_total/k
+		Mar_Mean = Mar_total/k
+		Apr_Mean = Apr_total/k
+		May_Mean = May_total/k
+		Jun_Mean = Jun_total/k
+		Jul_Mean = Jul_total/k
+		Aug_Mean = Aug_total/k
+		Sep_Mean = Sep_total/k
+		Oct_Mean = Oct_total/k
+		Nov_Mean = Nov_total/k
+		Dec_Mean = Dec_total/k
 					
 write(50,5100) "Month","k","Mean","Total"
 write(50,5000) "January",k,Jan_Mean,Jan_total	
@@ -459,6 +494,37 @@ write(50,5000) "December",k,Dec_Mean,Dec_total
 		enddo				
  		rewind(25)
 		
+
+
+
+			
+			
+			
+!!!!!!!Notes!!!!!!!!!
+!Winter_total_k and spring are OK
+!Fall and Winter_total need to be written for k+1
+
+ 1000 format(I8,I5,I3,I3,I8,2(I6),2(f10.3),10(I8))
+ 1500 format(I8,I5,I3,I3,I8,I8,2(I6),2(f10.3),10(I8))
+ 3000 format(I8,7(I16))
+ 3100 format(a8,7(a16))
+ 3410 format(a8,7(a12))
+ 3400 format(I8,2(f12.2),4(I12),f12.0)
+ 3510 format(a8,6(a16))
+ 3500 format(I8,6(f16.2))
+ 3600 format(2(I5),2(f14.6)I6,5(f14.3),2(I14),2(f14.1),3(I6))
+ 3610 format(2(a5),2(a14),5(a14),a14,a14)
+ 4000 format(I11,2(f15.3),2(f20.3))
+ 4100 format(a11,2(a15)2(a20))
+ 5000 format(a12,I6,2(f14.3))
+ 5100 format(a12,a6,2(a14))
+
+
+20 close(20)			
+
+end
+
+
 
 ! Monthly Averages will start here.
 		! do n = 1,5000	
@@ -556,37 +622,6 @@ write(50,5000) "December",k,Dec_Mean,Dec_total
 		
 				! start_year = year
 			! enddo
-
-			
-			
-			
-!!!!!!!Notes!!!!!!!!!
-!Winter_total_k and spring are OK
-!Fall and Winter_total need to be written for k+1
-
- 1000 format(I8,I5,I3,I3,I8,2(I6),2(f10.3),10(I8))
- 1500 format(I8,I5,I3,I3,I8,I8,2(I6),2(f10.3),10(I8))
- 3000 format(I8,6(I16))
- 3100 format(a8,7(a16))
- 3410 format(a8,5(a12))
- 3400 format(I8,2(f12.2),2(I12),f12.0)
- 3510 format(a8,6(a16))
- 3500 format(I8,6(f16.2))
- 3600 format(2(I5),2(f14.6),5(f14.3),I14,f14.1,I14)
- 3610 format(2(a5),2(a14),5(a14),a14,a14)
- 4000 format(I11,2(f15.3),2(f20.3))
- 4100 format(a11,2(a15)2(a20))
- 5000 format(a12,I6,2(f14.3))
- 5100 format(a12,a6,2(a14))
-
-
-20 close(20)			
-
-end
-
-
-
-
 
 
 
