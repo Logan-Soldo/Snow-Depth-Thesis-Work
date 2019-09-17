@@ -40,7 +40,7 @@ start_time=$(date +%s)
 echo $start_time
 
  
-Blacklist="2741 2740 2739 2738 2737 2641 2640 2639 2638 2541 2540 2539 2538 2441 2440 2439 2438 2341 2340 2339 2241 2240 2141" 
+Blacklist="2741 2740 2739 2738 2737 2736 2641 2640 2639 2638 2637 2636 2541 2540 2539 2538 2441 2440 2439 2438 2341 2340 2339 2241 2240 2141" 
 
 for i in {12..27}
 do
@@ -50,7 +50,10 @@ do
 		 if [[ $Blacklist =~ $i$j ]]; then
 			 continue 							# If the number is in the list of cells not being used then it will skip this cell and proceed to the next cell.
 		 fi
-
+# for i in 26
+	# do 
+		# for j in 36
+		# do
 
 
 #		rm -r $datadir/$i$j/SnowDepth
