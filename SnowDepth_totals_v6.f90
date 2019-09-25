@@ -194,8 +194,6 @@ write(*,nml=cdh_nml)
 								! previous_snwd = zero_depth
 								write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
 								&zero_depth,zero_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area								
-							! elseif ((two_previous_snwd .NE. -99999) .AND. (previous_snwd .NE. -99999) .AND. &
-							! & (snwf_mean .EQ. 0) .AND. (mean_depth .GT. previous_snwd)) then
 							elseif ((mean_depth .ne. -99999) .and. (previous_snwd .ne. -99999) .AND. &
 							&(snwf_mean .EQ. 0) .AND. (mean_depth .GT. previous_snwd)) then				! will try using snwf median instead?	
 								 mean_depth = miss_depth
@@ -203,7 +201,7 @@ write(*,nml=cdh_nml)
 								write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
 								&miss_depth,miss_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area
 							elseif ((mean_depth .ne. -99999) .and. (previous_snwd .ne. -99999) .AND. &
-							&(mean_depth .GT. previous_snwd+1000)) then  ! could change this to a lower value...
+							&(mean_depth .GT. previous_snwd+750)) then  ! could change this to a lower value... (750mm == 29.5in)
 								mean_depth = miss_depth								
 							!	last_recorded = mean_depth								
 								write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
@@ -214,15 +212,8 @@ write(*,nml=cdh_nml)
 								write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
 								&miss_depth,miss_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area							
 							elseif (mean_depth .eq. -99999) then
-								!write(25,*) 'blank'
-								! read(20,1000,end=17) Datestring,year,month,day,julian,i,j,longitude,latitude,&
-								! &max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
-								! &station_25,station_50,station_100,NOAA_area
-								! read(15,1500,end=17)snwf_Datestring,snwf_year,snwf_month,snwf_day,snwf_julian,snf_count_day,i,j,longitude,latitude,&
-								! &snwf_max_elevation,snwf_min_elevation,snwf_mean,snwf_median,snwf_station_num,snwf_station_10,snwf_station_25,&
-								! &snwf_station_50,snwf_station_100,snwf_NOAA_area 			! Read in snowfall data	
-										   write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
-										   &mean_depth,median_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area								
+							   write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
+							   &mean_depth,median_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area								
 								backspace(20)							
 								backspace(20)
 								backspace(20)
@@ -234,7 +225,6 @@ write(*,nml=cdh_nml)
 							!	backspace(25)							
 								!	write(200,*) "in backspace"
 								!	write(200,*) year, month, day,julian,count_day,snf_count_day, mean_depth
-	!
 										read(20,1000,end=17) Datestring,year,month,day,julian,i,j,longitude,latitude,&
 										&max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
 										&station_25,station_50,station_100,NOAA_area
@@ -242,27 +232,17 @@ write(*,nml=cdh_nml)
 										&snwf_max_elevation,snwf_min_elevation,snwf_mean,snwf_median,snwf_station_num,snwf_station_10,snwf_station_25,&
 										&snwf_station_50,snwf_station_100,snwf_NOAA_area 			! Read in snowfall data		
 										count_day = snf_count_day
-
-								!		write(200,*) year, month, day,julian, count_day, snf_count_day,mean_depth
-									!	   write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
-									!	   &mean_depth,median_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area											
-								
+								!		write(200,*) year, month, day,julian, count_day, snf_count_day,mean_depth																		
 								if (mean_depth .eq. -99999) then
 										! write(200,*) "in if"
-										! write(200,*)year, month, day,julian, count_day,snf_count_day, mean_depth
-										
-										 ! write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
-										 ! &miss_depth,miss_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area
-										
+										! write(200,*)year, month, day,julian, count_day,snf_count_day, mean_depth										
 										read(20,1000,end=17) Datestring,year,month,day,julian,i,j,longitude,latitude,&
 										&max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
 										&station_25,station_50,station_100,NOAA_area		
 										read(15,1500,end=17)snwf_Datestring,snwf_year,snwf_month,snwf_day,snwf_julian,snf_count_day,i,j,longitude,latitude,&
 										&snwf_max_elevation,snwf_min_elevation,snwf_mean,snwf_median,snwf_station_num,snwf_station_10,snwf_station_25,&
 										&snwf_station_50,snwf_station_100,snwf_NOAA_area 			! Read in snowfall data											
-								!		count_day = count_day + 1 
-										count_day = snf_count_day
-										
+										count_day = snf_count_day										
 										 write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,miss_depth,miss_depth,&
 										 &miss_depth,miss_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area											
 										! write(200,*) year, month, day,julian,count_day,snf_count_day, mean_depth 
@@ -273,11 +253,8 @@ write(*,nml=cdh_nml)
 										read(15,1500,end=17)snwf_Datestring,snwf_year,snwf_month,snwf_day,snwf_julian,snf_count_day,i,j,longitude,latitude,&
 										&snwf_max_elevation,snwf_min_elevation,snwf_mean,snwf_median,snwf_station_num,snwf_station_10,snwf_station_25,&
 										&snwf_station_50,snwf_station_100,snwf_NOAA_area 			! Read in snowfall data		
-									!	count_day = count_day + 1
-										count_day = snf_count_day
-										
-										! write(200,*) year, month, day,julian, count_day,snf_count_day, mean_depth 
-										
+										count_day = snf_count_day										
+										! write(200,*) year, month, day,julian, count_day,snf_count_day, mean_depth 										
 										 write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
 										 &mean_depth,median_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area											
 										! write(200,*) "end if"
@@ -309,28 +286,10 @@ write(*,nml=cdh_nml)
 										
 										! write(200,*) year,month,day,julian,count_day, mean_depth
 										write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
-										&mean_depth,miss_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area							
-										
-										! read(20,1000,end=17) Datestring,year,month,day,julian,i,j,longitude,latitude,&
-										! &max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
-										! &station_25,station_50,station_100,NOAA_area		
-										! read(15,1500,end=17)snwf_Datestring,snwf_year,snwf_month,snwf_day,snwf_julian,snf_count_day,i,j,longitude,latitude,&
-										! &snwf_max_elevation,snwf_min_elevation,snwf_mean,snwf_median,snwf_station_num,snwf_station_10,snwf_station_25,&
-										! &snwf_station_50,snwf_station_100,snwf_NOAA_area 			! Read in snowfall data												
-								! !		count_day =count_day + 1
-										! count_day = snf_count_day
-										
-										! write(200,*) year,month,day,julian,count_day, mean_depth										
-										! write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,max_elevation,min_elevation,&
-										! &mean_depth,mean_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area															
+										&mean_depth,miss_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area																									
+										! write(200,*) year,month,day,julian,count_day, mean_depth																							
 										! write(200,*)"endif"				
 									endif
-
-							! elseif ((two_previous_snwd .eq. -99999) .AND. (previous_snwd .eq. -99999)) then	
-								 ! mean_depth = previous_snwd
-								! ! previous_snwd = two_previous_snwd
-								! write(25,1500) Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,miss_depth,miss_depth,&
-								! &miss_depth,miss_depth,station_num,station_10,station_25,station_50,station_100,NOAA_area	
 									
 							else
 								last_recorded = mean_depth
@@ -502,8 +461,7 @@ write(*,nml=cdh_nml)
 									endif
 									DaysAbove76 = 0								! Days above is reset
 								endif
-							
-							
+														
 							elseif (mean_depth .EQ. -99999) then
 								miss_counter(k) = miss_counter(k) + 1	
 								miss_total = miss_total + 1
@@ -569,7 +527,6 @@ write(*,nml=cdh_nml)
 						write(30,3000) study_year,AvgElevation(k),Depth_mean(k), max_mean(k),&
 						&max_count(k),melt_length(k),max_reporting(k)  ! This file will only write on calculated statistics. i.e. sum, mean, max, min, standard deviation.	
 						write(34,3400) study_year,counter_76(k),percent_76(k), MaxDaysAbove76(k),First7day(k),LastDay(k),Last7day(k),flag(k)
-!						write(34,*) DaysAbove76
 						write(35,3500) study_year,zero_counter(k),zero_percent(k),counter_76(k),percent_76(k),miss_counter(k),miss_percent(k)    ! This file will be to check the quality of the data. The zero_counter could be important for number of days with snow on the ground.
 
 						study_year = study_year + 1
