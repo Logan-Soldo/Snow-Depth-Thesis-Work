@@ -64,19 +64,25 @@
 	  real  per25,per50,per76,per125,per150,tot_snwcover,countGT0(52)
 	  real count25(52),count50(52),count76(52),count100(52),count125(52),range_count(52)
 	  real range_countb(52)
-	  real DecadeSum1,DecadeSum2,DecadeSum3,DecadeSum4,DecadeSum5
-	  real DecadeDif_1,DecadeDif_2,DecadeDif_3,DecadeDif_4,DecadeDif_5
+
+	  real AnnDecadeSum1,AnnDecadeSum2,AnnDecadeSum3,AnnDecadeSum4,AnnDecadeSum5
+	  real AnnDecadeDif_1,AnnDecadeDif_2,AnnDecadeDif_3,AnnDecadeDif_4,AnnDecadeDif_5
+
+	  real DMDecadeSum1,DMDecadeSum2,DMDecadeSum3,DMDecadeSum4,DMDecadeSum5
+	  real DMDecadeDif_1,DMDecadeDif_2,DMDecadeDif_3,DMDecadeDif_4,DMDecadeDif_5
+	  real SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLDecadeSum4,SLDecadeSum5
+	  real SLDecadeDif_1,SLDecadeDif_2,SLDecadeDif_3,SLDecadeDif_4,SLDecadeDif_5
 	  ! real GDH(24), GDD(365,24),Daily_GDD(365),total_GDD(80),Base,total_100(80)
 	  ! real total_GDH(80)
 
 	  	  
 	 character(len=500) :: inputfile,inputfile2,outputfile3,outputfile4,outputfile5,&
 	 & outputfile6,outputfile7,outputfile8,outputfile9,outputfile10,outputfile11, &
-	 & outputfile12,outputfile13,outputfile14,outputfile15
+	 & outputfile12,outputfile13,outputfile14,outputfile15,outputfile16,outputfile17
 
 	  namelist /cdh_nml/ inputfile,inputfile2,outputfile3,outputfile4,outputfile5,&
 	 & outputfile6,outputfile7,outputfile8,outputfile9,outputfile10,outputfile11,&
-	 & outputfile12,outputfile13,outputfile14,outputfile15
+	 & outputfile12,outputfile13,outputfile14,outputfile15,outputfile16,outputfile17
 open(33,file='cdh.nml',status='old')
 read(33,nml=cdh_nml,end=55)
 55 close(33)
@@ -92,34 +98,61 @@ write(*,nml=cdh_nml)
 	  ! open(20, file=outputfile,status="replace")             ! Split Date
 	  open(25, file=inputfile,status="old")			 		 ! Count Date
 	  open(30, file=outputfile3,status="replace")            ! MeanSnowDepth
-	  open(34, file=outputfile4,status="replace")            ! 76SnowDepth
-	  open(35, file=outputfile5,status="replace")			 ! SnowDepth Quality
-	  open(38, file=outputfile6,status="replace")			 ! Monthly Percent above x mm
-	  open(40, file=outputfile7,status="replace")			 ! Daily Snow Depth
-	  open(50, file=outputfile8,status="replace")			 ! Monthly Average
-	  open(60, file=outputfile9,status="replace")	  		 ! Seasonal Snow Depth
-	  
-	  open(80, file=outputfile10,status="replace")			 ! TOTAL Percent missing
-	  open(81, file=outputfile11,status="replace")			 ! TOTAL Percent depth	  
-	  open(82, file=outputfile12,status="replace")			 ! TOTAL Monthly Snow Depth
-	  open(83, file=outputfile13,status="replace")			 ! TOTAL Monthly Snwd GE 76mm
-	  open(84, file=outputfile14,status="replace")			 ! TOTAL Decade Percent GE76mm
-	  Open(200,file=outputfile15, status = "replace")		 ! Junk
+	  open(31, file=outputfile4,status="replace")			 ! MaxReporting		
+	  open(34, file=outputfile5,status="replace")            ! 76SnowDepth
+	  open(35, file=outputfile6,status="replace")			 ! SnowDepth Quality
+	  open(38, file=outputfile7,status="replace")			 ! Monthly Percent above x mm
+	  open(40, file=outputfile8,status="replace")			 ! Daily Snow Depth
+	  open(50, file=outputfile9,status="replace")			 ! Monthly Average
+	  open(60, file=outputfile10,status="replace")	  		 ! Seasonal Snow Depth
+	  ! Writing out "TOTAL" (i.e. all cells in one file) below.
+	  open(80, file=outputfile11,status="replace")			 ! TOTAL Percent missing
+	  open(81, file=outputfile12,status="replace")			 ! TOTAL Percent depth	  
+	  open(82, file=outputfile13,status="replace")			 ! TOTAL Monthly Snow Depth
+	  open(83, file=outputfile14,status="replace")			 ! TOTAL Monthly Snwd GE 76mm
+	  open(84, file=outputfile15,status="replace")			 ! TOTAL Decade Percent GE76mm
+	  open(85, file=outputfile16,status="replace")			 ! TOTAL Decade season length
+	  Open(200,file=outputfile17, status = "replace")		 ! Junk
 !	  open(50,file = outputfile3,status = "replace")
 	  
 
 	
-	DecadeSum1 = 0.0
-	DecadeSum2 = 0.0
-	DecadeSum3 = 0.0
-	DecadeSum4 = 0.0
-	DecadeSum5 = 0.0
+	DMDecadeSum1 = 0.0
+	DMDecadeSum2 = 0.0
+	DMDecadeSum3 = 0.0
+	DMDecadeSum4 = 0.0
+	DMDecadeSum5 = 0.0
 
-	DecadeDif_1 = 0.0
-	DecadeDif_2 = 0.0
-	DecadeDif_3 = 0.0
-	DecadeDif_4 = 0.0
-	DecadeDif_5 = 0.0
+	DMDecadeDif_1 = 0.0
+	DMDecadeDif_2 = 0.0
+	DMDecadeDif_3 = 0.0
+	DMDecadeDif_4 = 0.0
+	DMDecadeDif_5 = 0.0
+	
+	SLDecadeSum1 = 0.0
+	SLDecadeSum2 = 0.0
+	SLDecadeSum3 = 0.0
+	SLDecadeSum4 = 0.0
+	SLDecadeSum5 = 0.0
+
+	SLDecadeDif_1 = 0.0
+	SLDecadeDif_2 = 0.0
+	SLDecadeDif_3 = 0.0
+	SLDecadeDif_4 = 0.0
+	SLDecadeDif_5 = 0.0
+	
+	AnnDecadeSum1 = 0.0
+	AnnDecadeSum2 = 0.0
+	AnnDecadeSum3 = 0.0
+	AnnDecadeSum4 = 0.0
+	AnnDecadeSum5 = 0.0
+
+	AnnDecadeDif_1 = 0.0
+	AnnDecadeDif_2 = 0.0
+	AnnDecadeDif_3 = 0.0
+	AnnDecadeDif_4 = 0.0
+	AnnDecadeDif_5 = 0.0	
+
 	avg_max_mean = 0
 	
 	do k = 1,52
@@ -264,7 +297,7 @@ write(*,nml=cdh_nml)
 	enddo
 
 		
-		write(30,3100) "year","k","SnowDepth Mean","Mean Max","Max Day","Melt Length","Max Reporting"    !"Stations Reporting","Stations 10mm","Stations 25mm","Station 50mm","Station 100mm"
+		write(30,3100) "year","k","SnowDepthMean","MeanMax","MaxDay","MeltLength","MaxReporting"    !"Stations Reporting","Stations 10mm","Stations 25mm","Station 50mm","Station 100mm"
 		write(34,3410) "year","76Count","76Percent","MaxAbove76","First7day","Last7Days","DaysAbove76","flag"
 		write(35,3510) "year","Zero Count","Zero Percent","7.6 Count","7.6 Percent","Miss Count","Miss Percent"
 		write(38,3820) "year","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
@@ -584,8 +617,10 @@ write(*,nml=cdh_nml)
 							max_year = max_mean_year(k)
 						endif
 						
-						First7day(k) = First7day(k) - 7
-						FstLstDiff(k) = Last7Day(k) - First7day(k)
+						if (First7day(k) .ne. 0) then
+							First7day(k) = First7day(k) - 7
+							FstLstDiff(k) = Last7Day(k) - First7day(k)
+						endif
 						
 						AvgElevation(k) = (abs_max_elevation(k) - abs_min_elevation(k))/2  ! This gives an average for each year of the absolute max and min elevation.
 						
@@ -595,6 +630,7 @@ write(*,nml=cdh_nml)
 						
 						write(30,3000) study_year,k,Depth_mean(k), max_mean(k),&
 						&max_count(k),melt_length(k),max_reporting(k)  ! This file will only write on calculated statistics. i.e. sum, mean, max, min, standard deviation.	
+						write(31,*) max_reporting(k)
 						write(34,3400) study_year,counter_76(k),percent_76(k), MaxDaysAbove76(k),&
 						&First7day(k),Last7day(k),FstLstDiff(k),DaysAbove76,flag(k)
 						write(35,3500) study_year,gtzero_counter(k),zero_percent(k),counter_76(k),percent_76(k),miss_counter(k),miss_percent(k)    ! This file will be to check the quality of the data. The gtzero_counter could be important for number of days with snow on the ground.
@@ -638,8 +674,8 @@ write(*,nml=cdh_nml)
 			AvgFstLstDiff = (sum(FstLstDiff,k))/(sumflag)
 				
 		else 
-			AvgFst7day = -99999
-			AvgLst7day = -99999
+			AvgFst7day = 0
+			AvgLst7day = 0
 		endif
 		
 		avg_max_mean = (((sum(max_mean,k))/k))/10
@@ -704,18 +740,46 @@ write(*,nml=cdh_nml)
 		write(200,*) sum(Jan_zdepth,k),sum(Jan_count,k)
 		
 		
-		DecadeSum1 = ((sum(count76(3:12))/(sum(range_count(3:12)))))*100				! Calculating number of days above 7.6cm by decade between November and March
-		DecadeSum2 = ((sum(count76(13:22))/(sum(range_count(13:22)))))*100
-		DecadeSum3 = ((sum(count76(23:32))/(sum(range_count(23:32)))))*100
-		DecadeSum4 = ((sum(count76(33:42))/(sum(range_count(33:42)))))*100
-		DecadeSum5 = ((sum(count76(43:52))/(sum(range_count(43:52)))))*100
+		! AnnDecadeSum1 = ((sum(count76(3:12))/(sum(range_count(3:12)))))*100				! Calculating number of days above 7.6cm for annual values.
+		! AnnDecadeSum2 = ((sum(count76(13:22))/(sum(range_count(13:22)))))*100
+		! AnnDecadeSum3 = ((sum(count76(23:32))/(sum(range_count(23:32)))))*100
+		! AnnDecadeSum4 = ((sum(count76(33:42))/(sum(range_count(33:42)))))*100
+		! AnnDecadeSum5 = ((sum(count76(43:52))/(sum(range_count(43:52)))))*100
 
-		DecadeDif_1 = per76-DecadeSum1					! Calculating Percentage Anamolies
-		DecadeDif_2 = per76-DecadeSum2
-		DecadeDif_3 = per76-DecadeSum3
-		DecadeDif_4 = per76-DecadeSum4
-		DecadeDif_5 = per76-DecadeSum5
+		! AnnDecadeDif_1 = per76-AnnDecadeSum1					! Calculating Percentage Anamolies
+		! AnnDecadeDif_2 = per76-AnnDecadeSum2
+		! AnnDecadeDif_3 = per76-AnnDecadeSum3
+		! AnnDecadeDif_4 = per76-AnnDecadeSum4
+		! AnnDecadeDif_5 = per76-AnnDecadeSum5
+
+		!!!!!!!!!!!!!!!!!!!!!!! Decadal above 7.6 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		DMDecadeSum1 = ((sum(count76(3:12))/(sum(range_count(3:12)))))*100				! Calculating number of days above 7.6cm by decade between November and March
+		DMDecadeSum2 = ((sum(count76(13:22))/(sum(range_count(13:22)))))*100
+		DMDecadeSum3 = ((sum(count76(23:32))/(sum(range_count(23:32)))))*100
+		DMDecadeSum4 = ((sum(count76(33:42))/(sum(range_count(33:42)))))*100
+		DMDecadeSum5 = ((sum(count76(43:52))/(sum(range_count(43:52)))))*100
+
+		DMDecadeDif_1 = per76-DMDecadeSum1					! Calculating Percentage Anamolies
+		DMDecadeDif_2 = per76-DMDecadeSum2
+		DMDecadeDif_3 = per76-DMDecadeSum3
+		DMDecadeDif_4 = per76-DMDecadeSum4
+		DMDecadeDif_5 = per76-DMDecadeSum5
 		!write(*,*) Decade
+		
+	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Season Length	!!!!!!!!!!!!!!!!!!!!!!!!
+	! Taking the decadal average of the season length and then caculating the difference in anamoly.
+		SLDecadeSum1 = ((sum(FstLstDiff(3:12)))/10)				! SL == Season Length
+		SLDecadeSum2 = ((sum(FstLstDiff(13:22)))/10)
+		SLDecadeSum3 = ((sum(FstLstDiff(23:32)))/10)
+		SLDecadeSum4 = ((sum(FstLstDiff(33:42)))/10)
+		SLDecadeSum5 = ((sum(FstLstDiff(43:52)))/10)
+		
+		SLDecadeDif_1 = AvgFstLstDiff-SLDecadeSum1					! Calculating  Anamolies
+		SLDecadeDif_2 = AvgFstLstDiff-SLDecadeSum2
+		SLDecadeDif_3 = AvgFstLstDiff-SLDecadeSum3
+		SLDecadeDif_4 = AvgFstLstDiff-SLDecadeSum4
+		SLDecadeDif_5 = AvgFstLstDiff-SLDecadeSum5		 !WRITE OUT
+		
 		
 write(38,3810) "Percent Cover",Jan_zmean,Feb_zmean,Mar_zmean,Apr_zmean,May_zmean,&
 &Jun_zmean,Jul_zmean,Aug_zmean,Sep_zmean,Oct_zmean,Nov_zmean,Dec_zmean
@@ -744,8 +808,11 @@ write(82,8200) i,j,latitude,longitude,Jan_zmean,Feb_zmean,Mar_zmean,Apr_zmean,Ma
 write(83,8200) i,j,latitude,longitude,Jan_zzmean,Feb_zzmean,Mar_zzmean,Apr_zzmean,May_zzmean,&
 &Jun_zzmean,Jul_zzmean,Aug_zzmean,Sep_zzmean,Oct_zzmean,Nov_zzmean,Dec_zzmean
 
-write(84,8400) i,j,latitude,longitude,DecadeSum1,DecadeSum2,DecadeSum3,DecadeSum4,DecadeSum5,&
-&DecadeDif_1,DecadeDif_2,DecadeDif_3,DecadeDif_4,DecadeDif_5
+write(84,8400) i,j,latitude,longitude,DMDecadeSum1,DMDecadeSum2,DMDecadeSum3,DMDecadeSum4,DMDecadeSum5,&
+&DMDecadeDif_1,DMDecadeDif_2,DMDecadeDif_3,DMDecadeDif_4,DMDecadeDif_5
+
+write(85,8400) i,j,latitude,longitude,SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLDecadeSum4,SLDecadeSum5,&
+&SLDecadeDif_1,SLDecadeDif_2,SLDecadeDif_3,SLDecadeDif_4,SLDecadeDif_5
 		
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
