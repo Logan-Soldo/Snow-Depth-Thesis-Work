@@ -59,7 +59,9 @@ do
 #		rm -r $datadir/$i$j/SnowDepth
 		mkdir -p $datadir/$i$j/SnowDepth
 		mkdir -p $datadir/All/PercentMiss/
-			mkdir -p $datadir/$i$j/SnowDepth/Junk
+		mkdir -p $datadir/All/MaxReporting/
+		mkdir -p $datadir/$i$j/SnowDepth/Junk
+	#	mkdir -p $datadir/$i$j/SnowDepth/TimeSeries
 
 
 
@@ -76,6 +78,8 @@ do
 	fileout=$outputdir/$i$j/SnowDepth/
 	fileout2=$outputdir/All/PercentMiss/
 	fileout3=$outputdir/$i$j/SnowDepth/Junk/
+	fileout4=$outputdir/All/MaxReporting/
+#	fileout4=$outputdir/$i$j/SnowDepth/TimeSeries
 
     echo $filename
 	echo $fileout
@@ -86,17 +90,20 @@ do
 inputfile="${filein}",
 inputfile2="${filein2}",
 outputfile3="${fileout}${i}${j}_MeanSnowDepth.txt",
-outputfile4="${fileout}${i}${j}_76SnowDepth.txt",
-outputfile5="${fileout}${i}${j}_SDQuality.txt",
-outputfile6="${fileout}${i}${j}_MonthAboveX.txt",
-outputfile7="${fileout}${i}${j}_DaySnowDepth.txt",
-outputfile8="${fileout}${i}${j}_MonthlyAverage.txt",
-outputfile9="${fileout}${i}${j}_SeasonalSnowDepth.txt",
-outputfile10="${fileout2}${i}${j}_PercentMiss.txt",
-outputfile11="${fileout2}${i}${j}_PercentDepth.txt",
-outputfile12="${fileout2}${i}${j}_PercentMonthlySD.txt",
-outputfile13="${fileout2}${i}${j}_PercentMonthy76.txt",
-outputfile14="${fileout3}${i}${j}_Junk.txt",
+outputfile4="${fileout4}${i}${j}_MaxReporting.txt",
+outputfile5="${fileout}${i}${j}_76SnowDepth.txt",
+outputfile6="${fileout}${i}${j}_SDQuality.txt",
+outputfile7="${fileout}${i}${j}_MonthAboveX.txt",
+outputfile8="${fileout}${i}${j}_DaySnowDepth.txt",
+outputfile9="${fileout}${i}${j}_MonthlyAverage.txt",
+outputfile10="${fileout}${i}${j}_SeasonalSnowDepth.txt",
+outputfile11="${fileout2}${i}${j}_PercentMiss.txt",
+outputfile12="${fileout2}${i}${j}_PercentDepth.txt",
+outputfile13="${fileout2}${i}${j}_PercentMonthlySD.txt",
+outputfile14="${fileout2}${i}${j}_PercentMonthy76.txt",
+outputfile15="${fileout2}${i}${j}_DecadeSum76.txt",
+outputfile16="${fileout2}${i}${j}_DecadeSL.txt",
+outputfile17="${fileout3}${i}${j}_Junk.txt",
 /
 EOF
 
@@ -124,16 +131,24 @@ EOF
 	echo "Concatenating files and removing residuals"
 	
 	rm -r $outputdir/All/PercentMiss/All*.txt
+	rm -r $outputdir/All/PercentMiss/DecadeSL_All.txt
+	rm -r $outputdir/All/MaxReporting/MaxReporting.txt
 	
 	cat $outputdir/All/PercentMiss/*_PercentMiss.txt >> $outputdir/All/PercentMiss/AllPercent_missing.txt
 	cat $outputdir/All/PercentMiss/*_PercentDepth.txt >> $outputdir/All/PercentMiss/AllPercent_Depth.txt
 	cat $outputdir/All/PercentMiss/*_PercentMonthlySD.txt >> $outputdir/All/PercentMiss/AllPercent_MonthlySD.txt
 	cat $outputdir/All/PercentMiss/*_PercentMonthy76.txt >> $outputdir/All/PercentMiss/AllPercent_Monthly76.txt
-   
+   	cat $outputdir/All/PercentMiss/*_DecadeSum76.txt >> $outputdir/All/PercentMiss/AllPercent_Decade76.txt
+	cat $outputdir/All/PercentMiss/*_DecadeSL.txt >> $outputdir/All/PercentMiss/DecadeSL_All.txt
+	
+	paste -d "," $outputdir/All/MaxReporting/*_MaxReporting.txt >> $outputdir/All/MaxReporting/MaxReporting.txt
+
     rm $outputdir/All/PercentMiss/*_PercentMiss.txt
     rm $outputdir/All/PercentMiss/*_PercentDepth.txt
 	rm $outputdir/All/PercentMiss/*_PercentMonthlySD.txt
 	rm $outputdir/All/PercentMiss/*_PercentMonthy76.txt
+	rm $outputdir/All/PercentMiss/*_DecadeSum76.txt
+	rm $outputdir/All/PercentMiss/*_DecadeSL.txt
 
 #rm -f data1.bin
 
