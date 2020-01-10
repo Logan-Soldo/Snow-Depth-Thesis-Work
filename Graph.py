@@ -34,7 +34,17 @@ def read_file(CellList,filelist,input_location):
                 break
         else:
             print("try again")
-            
+
+def region_define(region_select):
+    CellList = []
+    reg_file = pd.read_fwf("U:\Research\SnowDepth_Data\Outputs\All\PercentMiss\AllPercent_Depth.txt",header=None)
+
+    sort_region = reg_file.loc[reg_file[11] == int(region_select)]
+#    cell_reg = sort_region[[0,1,11]]
+    cell_reg = sort_region[0].astype(str) + sort_region[1].astype(str)  
+    CellList = cell_reg.tolist()
+    
+    return CellList
 def get_header(filelist):
     for f in filelist:
         f_open= open(f)
@@ -42,7 +52,7 @@ def get_header(filelist):
     header=[]
    # print(line)
     split_line = line.split()
-    print(split_line)
+  #  print(split_line)
     for l in line:
         header.append(split_line[1])
     header = header[0]
@@ -87,20 +97,40 @@ def total_file(Blacklist):
                 CellList.append(str(i)+str(j))
     return CellList
 
-def Monthly_plot(filelist,header,plt_index):
- for fname in filelist:
-    try:
-#        data=np.loadtxt(fname,skiprows=1)
-        data= np.loadtxt((open(fname).readlines()[:-1]), skiprows=1, dtype=None)
-        plt.title(header)
-        x = data[:,0]
-        y = data[:,plt_index]
-        plt.plot(x,y,label=fname[35:39])
-        plt.legend()
-        plt.figure(figsize=(20,10))
-    except IOError:
-        continue 
-
+def Monthly_plot(filelist,header,plt_index,selection,region):
+    y_list = []
+    y=[]
+    fname_lst = []
+    plt.figure(figsize=(20,10))
+    for fname in filelist:
+        try:
+    #        data=np.loadtxt(fname,skiprows=1)
+            data= np.loadtxt((open(fname).readlines()[:-1]), skiprows=1, dtype=None)
+            plt.title(header)
+            x = data[:,0]
+            y_temp = data[:,plt_index]
+            y_list.append(y_temp)
+      #      plt.plot(x,y,label=fname[35:39])
+        except IOError:
+            continue 
+    y_list= np.array(y_list).tolist()
+    y= np.mean(y_list,axis=0)
+    ymin = np.min(y_list,axis=0)
+    ymax = np.max(y_list,axis=0)
+    
+    if selection == "all": 
+        title = header + " "+ selection + " " + "Cells"
+    elif selection == "region":
+         title = header + " "+ selection + " " + region      
+    else:
+        title = header + " "+ selection + " " + "%s to %s" %(fname_lst[0],fname_lst[-1])
+    
+    
+    plt.title(title)                    # Plotting title from above
+    plt.plot(x,y,label="Average") # change to "Average"?
+    plt.plot(x,ymin,label="Min",linestyle="dashed")
+    plt.plot(x,ymax,label="Max",linestyle="dashed")
+    plt.legend()
 def Plot76(filelist,header,plt_index):
     plt.figure(figsize=(20,10))
     for fname in filelist:
@@ -115,7 +145,8 @@ def Plot76(filelist,header,plt_index):
             plt.legend()            
         except IOError:
             continue 
-                 
+
+                
 def Day_mean(filelist,header,plt_index,selection):
     y_list = []
     y=[]
@@ -167,13 +198,13 @@ def Plot_Decade76(file,CellList,col):           # DOES NOT WORK AS PLANNED NEED 
 #    y = CellList
 #    plt.plot(x,y)    
 def SnowDepthMean(file,header,plt_index,split_line):
-    print(header)
+  #  print(header)
     for f in file:
         data=pd.read_csv(f,skiprows=1)
        # data["year"]#,index_col=["year","MaxReporting"]) 
      #   usecols=["year","MaxReporting"])
 
-    print(data)
+   # print(data)
 
 def main():
     pd.set_option('display.max_columns', None)  
@@ -184,7 +215,7 @@ def main():
     while True:
         input_location = input("input (1) for individual files, (2) for concatenated files: ")
         if input_location == "1":
-            selection = input("display row,column, all or end?: ")
+            selection = input("display row,column, all,region or end?: ")
             if selection == "end":
                 break
             if selection == "all":
@@ -203,16 +234,22 @@ def main():
                             CellList = row_file(Blacklist,input1,input2)
                         elif selection.lower() == "column":
                             CellList = col_file(Blacklist,input1,input2)
-                
+            elif selection == "region":
+                region_select = input("Select a region between 1-4: ")
+                if region_select.lower() == 'end':
+                    break
+                else:
+                    CellList = region_define(region_select)
+            
             input3,filelist = read_file(CellList,filelist,input_location)            
             header,var,split_line = get_header(filelist)        
             print(var)            
             header,plt_index = pick_var(split_line)                
             
             if input3 == "MonthlyAverage.txt":
-                Monthly_plot(filelist,header,plt_index)
+                Monthly_plot(filelist,header,plt_index,selection,region_select)
                 plt.show()
-                plt.clf()
+#                plt.clf()
             elif input3 == "76SnowDepth.txt":
                 Plot76(filelist,header,plt_index)
                 plt.show()
@@ -226,7 +263,7 @@ def main():
                 plt.show()
                 plt.clf()
         elif input_location == "2":
-            selection = input("display row,column, all or end?: ")
+            selection = input("display row,column,region, all or end?: ")
             if selection == "end":
                 break
             if selection == "all":
@@ -244,6 +281,13 @@ def main():
                             CellList = row_file(Blacklist,input1,input2)
                         elif selection.lower() == "column":
                             CellList = col_file(Blacklist,input1,input2)
+            elif selection == "region":
+                region_select = (input("Select a region between 1-4: "))
+                if region_select.lower() == 'end':
+                    break
+                else:
+                    CellList = region_define(region_select)
+                
                             
             input3,filelist = read_file(CellList,filelist,input_location)
             print(input3)
