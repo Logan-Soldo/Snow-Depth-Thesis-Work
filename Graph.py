@@ -1,6 +1,10 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.ticker import AutoMinorLocator
 import pandas as pd
+from scipy.interpolate import interp1d as interp
+from scipy.stats import linregress
+from scipy.stats import stats
 
 
 def read_file(CellList,filelist,input_location):
@@ -97,14 +101,11 @@ def total_file(Blacklist):
                 CellList.append(str(i)+str(j))
     return CellList
 
-def Monthly_plot(filelist,header,plt_index,selection,region):
+def Monthly_plot(filelist,header,plt_index,selection,region):               # Use this example for global plotting application
     y_list = []
-    y=[]
-    fname_lst = []
     plt.figure(figsize=(20,10))
     for fname in filelist:
         try:
-    #        data=np.loadtxt(fname,skiprows=1)
             data= np.loadtxt((open(fname).readlines()[:-1]), skiprows=1, dtype=None)
             plt.title(header)
             x = data[:,0]
@@ -112,9 +113,48 @@ def Monthly_plot(filelist,header,plt_index,selection,region):
             y_list.append(y_temp)
       #      plt.plot(x,y,label=fname[35:39])
         except IOError:
-            continue 
-    y_list= np.array(y_list).tolist()
-    y= np.mean(y_list,axis=0)
+            continue
+    plt_select1(x,y_list,selection,header,region)
+
+def Plot76(filelist,header,plt_index,selection,region):           # Added global plotting     
+    y_list = []
+    plt.figure(figsize=(20,10))
+    for fname in filelist:
+        try:
+            data=np.loadtxt(fname,skiprows=1)
+            plt.title(header)
+            x = data[:,0]
+            y_temp = data[:,plt_index]
+            y_list.append(y_temp)
+      #      plt.plot(x,y,label=fname[35:39])
+        except IOError:
+            continue
+    
+    plt_select1(x,y_list,selection,header,region)
+
+def Day_mean(filelist,header,plt_index,selection,region):                  # Added global plotting
+    
+    y_list = []
+    plt.figure(figsize=(20,10))
+    for fname in filelist:
+        try:
+            data=np.loadtxt(fname,skiprows=1)
+          #  plt.title(header)
+            x = data[:,0]
+            y_temp = data[:,plt_index]
+            y_list.append(y_temp)
+      #      plt.plot(x,y,label=fname[35:39])
+        except IOError:
+            continue
+    
+    plt_select1(x,y_list,selection,header,region)
+    
+def plt_select1(x,y_list,selection,header,region):
+    y=[]
+    fname_lst = []
+    
+    y_list = np.array(y_list).tolist()
+    y = np.mean(y_list,axis=0)
     ymin = np.min(y_list,axis=0)
     ymax = np.max(y_list,axis=0)
     
@@ -124,62 +164,44 @@ def Monthly_plot(filelist,header,plt_index,selection,region):
          title = header + " "+ selection + " " + region      
     else:
         title = header + " "+ selection + " " + "%s to %s" %(fname_lst[0],fname_lst[-1])
+        
     
+    regress = linregress(x,y)
+    lin_m = regress.slope
+    lin_b = regress.intercept
+    lin_r = stats.pearsonr(x,y)
+#    r_round = round(r[0],3)
+#    m_round = round(m,3)
+
+    c = color_select()
+    for i in range(len(c)):
+        r,g,b = c[i]
+        c[i] = (r / 255., g / 255., b / 255.)
+        
+#    f = interp(x,y)
+#    f2 = interp(x,y,kind="cubic")
+#    xnew = np.linspace(1966, 2017,num=1000)
     
     plt.title(title)                    # Plotting title from above
-    plt.plot(x,y,label="Average") # change to "Average"?
-    plt.plot(x,ymin,label="Min",linestyle="dashed")
-    plt.plot(x,ymax,label="Max",linestyle="dashed")
+    plt.grid()
+ #   plt.tick_params(which="minor",axis="y",direction="inout")
+    plt.ylabel("Sum of Monthly Depth(cm)")                  # Needs to be changed for every plot.
+    plt.xlabel("Year")
+   # plt.plot(xnew,f2(xnew),color=c[0],label="Average",markevery=100) # change to "Average"?
+    
+    plt.plot(x,y,color=c[0],label="Average",markevery=100) # change to "Average"?
+    if header != "MeanOfDay":
+        plt.plot(x,lin_m*x+lin_b,color=c[0],label="Linear Regression",linestyle="dashed")   # Regression of average
+    plt.plot(x,ymin,color=c[1],label="Min",linestyle="dashed")
+    plt.plot(x,ymax,color=c[1],label="Max",linestyle="dashed")
     plt.legend()
-def Plot76(filelist,header,plt_index):
-    plt.figure(figsize=(20,10))
-    for fname in filelist:
-        try:
-         #   data=np.loadtxt(fname,skiprows=1,usecols=(1,2,3))
-            data=np.loadtxt(fname,skiprows=1)
-  #          header = get_header()
-            plt.title(header)
-            x=data[:,0]
-            y=data[:,plt_index]
-            plt.plot(x,y,label=fname[35:39])
-            plt.legend()            
-        except IOError:
-            continue 
+    
+    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.png" %(title))  # Need to vary this formatting between graphics.
+    plt.show()
+                    
 
-                
-def Day_mean(filelist,header,plt_index,selection):
-    y_list = []
-    y=[]
-    fname_lst = []
-    plt.figure(figsize=(20,10))
-    for fname in filelist:
-        try:
-         #   data=np.loadtxt(fname,skiprows=1,usecols=(1,2,3))
-            data=np.loadtxt(fname,skiprows=1)
-  #          header = get_header()
-            x=data[:,0]
-            y_temp=data[:,plt_index]
-            y_list.append(y_temp)
-            fname_lst.append(fname[35:39])
 
-        except IOError:
-            continue 
-    y_list= np.array(y_list).tolist()
-  #  print(y_list)
-    y= np.mean(y_list,axis=0)
-    ymin = np.min(y_list,axis=0)
-    ymax = np.max(y_list,axis=0)
-  #  print(fname_lst)
-    title = header + " "+ selection + " " + "%s to %s" %(fname_lst[0],fname_lst[-1])
-  #  y_list=np.ndarray.tolist(y_list)  
-    plt.title(title)
-   
-    plt.plot(x,y,label="Average") # change to "Average"?
-    plt.plot(x,ymin,label="Min",linestyle="dashed")
-    plt.plot(x,ymax,label="Max",linestyle="dashed")
-    plt.legend()
-    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\MeanOfDay.png")
-
+    
 def Plot_Decade76(file,CellList,col):           # DOES NOT WORK AS PLANNED NEED TO RETHINK
     file['ij'] = file['i'].astype(str)+ file['j'].astype(str)  
     plotlist = file[file['ij'].isin(CellList)]
@@ -197,6 +219,7 @@ def Plot_Decade76(file,CellList,col):           # DOES NOT WORK AS PLANNED NEED 
     plt.show()
 #    y = CellList
 #    plt.plot(x,y)    
+    
 def SnowDepthMean(file,header,plt_index,split_line):
   #  print(header)
     for f in file:
@@ -206,13 +229,26 @@ def SnowDepthMean(file,header,plt_index,split_line):
 
    # print(data)
 
+def color_select():
+    '''
+    This function is called to generate colors for graphing.
+    Color maps can be found here: 
+    https://tableaufriction.blogspot.com/2012/11/finally-you-can-use-tableau-data-colors.html
+    '''
+    
+    tableau20blind = [(0, 107, 164), (255, 128, 14), (171, 171, 171), (89, 89, 89),
+             (95, 158, 209), (200, 82, 0), (137, 137, 137), (163, 200, 236),
+             (255, 188, 121), (207, 207, 207)]
+    return tableau20blind
+
+
 def main():
     pd.set_option('display.max_columns', None)  
     pd.set_option('display.expand_frame_repr', False)
     pd.set_option('max_colwidth', -1)
-    filelist = []
     Blacklist=[2741,2740,2739,2738,2737,2736,2641,2640,2639,2638,2637,2636,2541,2540,2539,2538,2441,2440,2439,2438,2341,2340,2339,2241,2240,2141]       
     while True:
+        filelist = []
         input_location = input("input (1) for individual files, (2) for concatenated files: ")
         if input_location == "1":
             selection = input("display row,column, all,region or end?: ")
@@ -220,7 +256,9 @@ def main():
                 break
             if selection == "all":
                 CellList = total_file(Blacklist)
+                region_select = 0
             elif selection == "row" or selection == "column":
+                region_select = 0
                 input1= input("Input coordinate 1,or 'end': " )
                 if input1.lower() == 'end':
                      break
@@ -248,20 +286,20 @@ def main():
             
             if input3 == "MonthlyAverage.txt":
                 Monthly_plot(filelist,header,plt_index,selection,region_select)
-                plt.show()
+#                plt.show()
 #                plt.clf()
             elif input3 == "76SnowDepth.txt":
-                Plot76(filelist,header,plt_index)
-                plt.show()
-                plt.clf()
+                Plot76(filelist,header,plt_index,selection,region_select)
+ #               plt.show()
+  #              plt.clf()
             elif input3 == "DaySnowDepth.txt":                  # Going to attempt to find average and max/min to graph. Will implement if it works.
-                Day_mean(filelist,header,plt_index,selection)
-                plt.show()
+                Day_mean(filelist,header,plt_index,selection,region_select)
+   #             plt.show()
 #                plt.clf()
             elif input3 == "MeanSnowDepth.txt":
                 SnowDepthMean(filelist,header,plt_index,split_line)
-                plt.show()
-                plt.clf()
+#                plt.show()
+#                plt.clf()
         elif input_location == "2":
             selection = input("display row,column,region, all or end?: ")
             if selection == "end":
