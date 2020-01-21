@@ -101,9 +101,17 @@ def total_file(Blacklist):
                 CellList.append(str(i)+str(j))
     return CellList
 
+def title_gen():
+    title = input("Input a title for this graph: ")
+    yaxis = input("Input a y-axis title: ")
+    xaxis = input("Input an x-axis title: ")
+    savefig = input("Input a file name: ")
+    return title,yaxis,xaxis,savefig
+
+
+######## Below this are all of the plotting functions. ##########
 def Monthly_plot(filelist,header,plt_index,selection,region):               # Use this example for global plotting application
     y_list = []
-    plt.figure(figsize=(20,10))
     for fname in filelist:
         try:
             data= np.loadtxt((open(fname).readlines()[:-1]), skiprows=1, dtype=None)
@@ -118,7 +126,6 @@ def Monthly_plot(filelist,header,plt_index,selection,region):               # Us
 
 def Plot76(filelist,header,plt_index,selection,region):           # Added global plotting     
     y_list = []
-    plt.figure(figsize=(20,10))
     for fname in filelist:
         try:
             data=np.loadtxt(fname,skiprows=1)
@@ -135,7 +142,6 @@ def Plot76(filelist,header,plt_index,selection,region):           # Added global
 def Day_mean(filelist,header,plt_index,selection,region):                  # Added global plotting
     
     y_list = []
-    plt.figure(figsize=(20,10))
     for fname in filelist:
         try:
             data=np.loadtxt(fname,skiprows=1)
@@ -157,14 +163,26 @@ def plt_select1(x,y_list,selection,header,region):
     y = np.mean(y_list,axis=0)
     ymin = np.min(y_list,axis=0)
     ymax = np.max(y_list,axis=0)
-    
-    if selection == "all": 
-        title = header + " "+ selection + " " + "Cells"
-    elif selection == "region":
-         title = header + " "+ selection + " " + region      
+
+    generate_title = input("Would you like to generate a title? (y/n): ")    
+    if generate_title == "n":
+        if selection == "all": 
+            title = header + " "+ selection + " " + "Cells"
+            yaxis = "test"
+            xaxis = "test"            
+            figname = input("Input a file name: ")
+        elif selection == "region":
+             title = header + " "+ "Region" + " " + region 
+             yaxis = "test"
+             xaxis = "test"             
+             figname = input("Input a file name: ")
+        else:
+            title = header + " "+ selection + " " + "%s to %s" %(fname_lst[0],fname_lst[-1])
+            yaxis = "test"
+            xaxis = "test"
+            figname = input("Input a file name: ")
     else:
-        title = header + " "+ selection + " " + "%s to %s" %(fname_lst[0],fname_lst[-1])
-        
+        title,yaxis,xaxis,figname = title_gen()
     
     regress = linregress(x,y)
     lin_m = regress.slope
@@ -181,22 +199,28 @@ def plt_select1(x,y_list,selection,header,region):
 #    f = interp(x,y)
 #    f2 = interp(x,y,kind="cubic")
 #    xnew = np.linspace(1966, 2017,num=1000)
+    plt.rc('font', family='serif')  
+    plt.rc('xtick', labelsize='x-small')
+    plt.rc('ytick', labelsize='x-small')    
     
-    plt.title(title)                    # Plotting title from above
+    plt.figure(figsize=(12,8))    
+    plt.title(title,fontsize=12)                    # Plotting title from above
     plt.grid()
  #   plt.tick_params(which="minor",axis="y",direction="inout")
-    plt.ylabel("Sum of Monthly Depth(cm)")                  # Needs to be changed for every plot.
-    plt.xlabel("Year")
+    plt.ylabel(yaxis,fontsize=12)                  # Needs to be changed for every plot.
+    plt.xlabel(xaxis,fontsize=12)
+    plt.xticks(range(1966,2017,5),fontsize=10)
+    plt.yticks(fontsize=10)
    # plt.plot(xnew,f2(xnew),color=c[0],label="Average",markevery=100) # change to "Average"?
     
-    plt.plot(x,y,color=c[0],label="Average",markevery=100) # change to "Average"?
+    plt.plot(x,y,color=c[0],label="Average",linewidth="2",markevery=100) # change to "Average"?
     if header != "MeanOfDay":
-        plt.plot(x,lin_m*x+lin_b,color=c[0],label="Linear Regression",linestyle="dashed")   # Regression of average
-    plt.plot(x,ymin,color=c[1],label="Min",linestyle="dashed")
-    plt.plot(x,ymax,color=c[1],label="Max",linestyle="dashed")
-    plt.legend()
+        plt.plot(x,lin_m*x+lin_b,color=c[0],label="Linear Regression",linewidth="2",linestyle="dashed")   # Regression of average
+    plt.plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
+    plt.plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
+    plt.legend(fontsize=10)
     
-    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.png" %(title))  # Need to vary this formatting between graphics.
+    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.png" %(figname))  # Need to vary this formatting between graphics.
     plt.show()
                     
 
