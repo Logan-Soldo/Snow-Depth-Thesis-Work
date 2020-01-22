@@ -113,7 +113,7 @@ def title_gen():
 
 
 ######## Below this are all of the plotting functions. ##########
-def Monthly_plot(filelist,header,plt_index,selection,region):               # Use this example for global plotting application
+def Set_Month(filelist,header,plt_index,selection,region):               # Use this example for global plotting application
     '''
     Introducing subplotting here as a demo.
     '''
@@ -121,18 +121,14 @@ def Monthly_plot(filelist,header,plt_index,selection,region):               # Us
     for fname in filelist:
         try:
             data= np.loadtxt((open(fname).readlines()[:-1]), skiprows=1, dtype=None)  # Coming out of loop too early, need to build a list of lists.
-           # plt.title(header)
-#            x = data[:,0]
-#            y_temp = data[:,1]          # plt_index gets its index when variable is chosen by user.
-#            y_list.append(y_temp)
-      #      plt.plot(x,y,label=fname[35:39])
             data_list.append(data)
         except IOError:
             continue
-  #  data_list = np.array(data_list).tolist()
 
-    plt_select1(selection,header,region,data_list)
-
+    title,yaxis,xaxis,figname = plt_select1(selection,header,region,data_list)
+    Month_plot(title,data_list,header,yaxis,xaxis)
+    return figname
+    
 def Plot76(filelist,header,plt_index,selection,region):           # Added global plotting     
     y_list = []
     for fname in filelist:
@@ -191,23 +187,32 @@ def plt_select1(selection,header,region,data_list):
 #    r_round = round(r[0],3)
 #    m_round = round(m,3)
 
-    c = color_select()
-    for i in range(len(c)):
-        r,g,b = c[i]
-        c[i] = (r / 255., g / 255., b / 255.)
+
         
 #    f = interp(x,y)
 #    f2 = interp(x,y,kind="cubic")
 #    xnew = np.linspace(1966, 2017,num=1000)
     plt.rc('font', family='serif')  
     plt.rc('xtick', labelsize='x-small')
-    plt.rc('ytick', labelsize='x-small')    
-    
+    plt.rc('ytick', labelsize='x-small')
+
+    return title,yaxis,xaxis,figname    
+ 
+def Month_plot(title,data_list,header,yaxis,xaxis):
+    '''
+    Used for plotting Monthly Data, use this as an example for future
+    figures that will require subplots.
+    '''
     fig,sub =  plt.subplots(5, 2, figsize=(12,8),constrained_layout=True)
 #    plt.figure(figsize=(12,8)) 
     fig.suptitle(title,fontsize=12)                    # Plotting title from above.
     #fig.autoscale()
-
+    
+    c = color_select()
+    for i in range(len(c)):
+        r,g,b = c[i]
+        c[i] = (r / 255., g / 255., b / 255.)
+        
     months = ["January","February","March","April","May","June",
               "September","October","November","December"]
     sub = sub.ravel()  
@@ -241,30 +246,21 @@ def plt_select1(selection,header,region,data_list):
       #  sub[i].plt.grid()        
         sub[i].set_xticks(range(1966,2017,5))#,fontsize=8)
         sub[i].set_xticklabels(range(1966,2017,5),fontsize=9) 
-        sub[i].locator_params(axis="y",tight=True,nbins=8)
+        sub[i].locator_params(axis="y",tight=True,nbins=6)   # change nbins integer to reduce number of y ticks
         sub[i].tick_params(axis="y",labelsize=9)                  # Needs to be changed for every plot.
-        sub[i].set_ylabel(yaxis)
+        sub[i].set_ylabel(yaxis,fontsize=8)
+      #  sub[i].labelsize('medium')
         sub[i].set_title(label=months[i])
         sub[i].plot(x,y,color=c[0],label="Average",linewidth="2") # change to "Average"?
         if header != "MeanOfDay":
             sub[i].plot(x,lin_m*x+lin_b,color=c[0],label="Linear Regression",linewidth="2",linestyle="dashed")   # Regression of average
-        sub[i].plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
-        sub[i].plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
+    #    sub[i].plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
+     #   sub[i].plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
+        sub[i].grid()
         
-       # sub[i].set_xlabel(xaxis,fontsize=12)
-   #     sub[i].set_xticks(range(1966,2017,5))
-    #    sub[i].set_yticks(fontsize=10)
-           # plt.plot(xnew,f2(xnew),color=c[0],label="Average",markevery=100) # change to "Average"?
-        
-    #    print(y_temp)    
-    #    print(y_list)
-    #    print(y)
-    #    print(ymin)
-    #    print(ymax) 
-        #  sub = plt.legend(fontsize=10)
-      #  fig.add_subplot(221)
-    
-    #    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.png" %(figname))  # Need to vary this formatting between graphics.
+
+def savefig(figname):    
+    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.pdf" %(figname))  # Need to vary this formatting between graphics.
     plt.show()                    
 
 
@@ -354,7 +350,9 @@ def main():
             header,plt_index = pick_var(split_line)             # Subplot changes should begin here.           
             
             if input3 == "MonthlyAverage.txt":
-                Monthly_plot(filelist,header,plt_index,selection,region_select)
+                figname = Set_Month(filelist,header,plt_index,selection,region_select)                
+                savefig(figname)
+                
 #                plt.show()
 #                plt.clf()
             elif input3 == "76SnowDepth.txt":
@@ -404,7 +402,7 @@ def main():
                 filelist.columns = col
             #    print(filelist)                
                 Plot_Decade76(filelist,CellList,col)
-                
+        
         else:
         #    input3.close()
             break
