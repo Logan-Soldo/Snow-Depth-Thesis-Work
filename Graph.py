@@ -206,8 +206,10 @@ def plt_select1(selection,header,region,data_list):
     fig,sub =  plt.subplots(5, 2, figsize=(12,8),constrained_layout=True)
 #    plt.figure(figsize=(12,8)) 
     fig.suptitle(title,fontsize=12)                    # Plotting title from above.
+    #fig.autoscale()
 
-
+    months = ["January","February","March","April","May","June",
+              "September","October","November","December"]
     sub = sub.ravel()  
  #   sub = fig.add_subplot(221)
     for i in range(10):
@@ -220,7 +222,7 @@ def plt_select1(selection,header,region,data_list):
             x = j[:,0]
             y_temp = j[:,i+1]          # plt_index gets its index when variable is chosen by user.
             y_list.append(y_temp)
-            print(y_list)
+        #    print(y_list)
             y_list = np.array(y_list).tolist()
             y = np.mean(y_list,axis=0)
           #  print(y)
@@ -234,19 +236,24 @@ def plt_select1(selection,header,region,data_list):
             lin_b = regress.intercept
             lin_r = stats.pearsonr(x,y)
             
-         #   plt.grid()
          #   plt.tick_params(which="minor",axis="y",direction="inout")
+        
+      #  sub[i].plt.grid()        
+        sub[i].set_xticks(range(1966,2017,5))#,fontsize=8)
+        sub[i].set_xticklabels(range(1966,2017,5),fontsize=9) 
+        sub[i].locator_params(axis="y",tight=True,nbins=8)
+        sub[i].tick_params(axis="y",labelsize=9)                  # Needs to be changed for every plot.
+        sub[i].set_ylabel(yaxis)
+        sub[i].set_title(label=months[i])
         sub[i].plot(x,y,color=c[0],label="Average",linewidth="2") # change to "Average"?
         if header != "MeanOfDay":
             sub[i].plot(x,lin_m*x+lin_b,color=c[0],label="Linear Regression",linewidth="2",linestyle="dashed")   # Regression of average
-        sub[i].plot(x,ymin,color=c[1],label="Min",linewidth="1",linestyle="dashed")
-        sub[i].plot(x,ymax,color=c[1],label="Max",linewidth="1",linestyle="dashed")
+        sub[i].plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
+        sub[i].plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
         
-        sub[i].set_ylabel(yaxis,fontsize=12)                  # Needs to be changed for every plot.
-     #   sub[i].set_xlabel(xaxis,fontsize=12)
-    #    sub[i] = plt.xticks(fontsize=10)
-        sub[i].set_xticks(range(1966,2017,5))
-          #  sub[i].set_yticks(fontsize=10)
+       # sub[i].set_xlabel(xaxis,fontsize=12)
+   #     sub[i].set_xticks(range(1966,2017,5))
+    #    sub[i].set_yticks(fontsize=10)
            # plt.plot(xnew,f2(xnew),color=c[0],label="Average",markevery=100) # change to "Average"?
         
     #    print(y_temp)    
