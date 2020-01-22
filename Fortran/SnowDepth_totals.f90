@@ -628,6 +628,20 @@ write(*,nml=cdh_nml)
 						percent_76(k) = (counter_76(k)/365.0)*100
 						miss_percent(k) = (miss_counter(k)/365.0)*100							
 						
+						Jan_total = Jan_total*0.1      ! Converting to cm.
+						Feb_total = Feb_total*0.1
+						Mar_total = Mar_total*0.1
+						Apr_total = Apr_total*0.1
+						May_total = May_total*0.1
+						Jun_total = Jun_total*0.1
+						Jul_total = Jul_total*0.1
+						Aug_total = Aug_total*0.1
+						Sep_total = Sep_total*0.1
+						Oct_total = Oct_total*0.1
+						Nov_total = Nov_total*0.1
+						Dec_total = Dec_total*0.1
+						
+						
 						write(30,3000) study_year,k,Depth_mean(k), max_mean(k),&
 						&max_count(k),melt_length(k),max_reporting(k)  ! This file will only write on calculated statistics. i.e. sum, mean, max, min, standard deviation.	
 						write(31,*) max_reporting(k)
