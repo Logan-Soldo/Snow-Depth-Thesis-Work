@@ -29,7 +29,7 @@
 	  integer AbsAverageElevation,abs_min_elevation(52), AvgElevation(52),melt_length(52)
 	  integer melt_days,miss_depth,two_previous_snwd,snf_count_day,abs_max,max_year
 	  integer max_mean_year(52),last_recorded,FstLstDiff(52),AvgFstLstDiff,sum_range
-	  integer flag2,avg_max_mean,sum_rangeb
+	  integer flag2,avg_max_mean,sum_rangeb,region
 	  real  Jan_count(52),Feb_count(52),Mar_count(52),Apr_count(52),May_count(52),Jun_count(52)
 	  real  Jul_count(52),Aug_count(52),Sep_count(52),Oct_count(52),Nov_count(52),Dec_count(52)	  
 !	  integer station_num,station_10,station_25,station_50,station_100
@@ -301,7 +301,7 @@ write(*,nml=cdh_nml)
 		write(34,3410) "year","76Count","76Percent","MaxAbove76","First7day","Last7Days","DaysAbove76","flag"
 		write(35,3510) "year","Zero Count","Zero Percent","7.6 Count","7.6 Percent","Miss Count","Miss Percent"
 		write(38,3820) "year","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
-		write(50,5100) "year","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
+		write(50,5100) "year","Jan","Feb","Mar","Apr","May","Jun","Sep","Oct","Nov","Dec"
 		! write(80,3610) "i","j","lat","lon","Miss Percent","Miss Count","Percent_76","Counter_76",&
 		! &"AvgMaxJulian","total_counter","max_reporting"     !percent missing is wrtitten out here. 
 		start_year = 1965				
@@ -634,8 +634,11 @@ write(*,nml=cdh_nml)
 						write(34,3400) study_year,counter_76(k),percent_76(k), MaxDaysAbove76(k),&
 						&First7day(k),Last7day(k),FstLstDiff(k),DaysAbove76,flag(k)
 						write(35,3500) study_year,gtzero_counter(k),zero_percent(k),counter_76(k),percent_76(k),miss_counter(k),miss_percent(k)    ! This file will be to check the quality of the data. The gtzero_counter could be important for number of days with snow on the ground.
+						! write(50,5000) study_year,Jan_total(k),Feb_total(k),Mar_total(k),Apr_total(k),May_total(k),Jun_total(k),&
+									! &Jul_total(k),Aug_total(k),Sep_total(k),Oct_total(k),&
+									! &Nov_total(k),Dec_total(k)
 						write(50,5000) study_year,Jan_total(k),Feb_total(k),Mar_total(k),Apr_total(k),May_total(k),Jun_total(k),&
-									&Jul_total(k),Aug_total(k),Sep_total(k),Oct_total(k),&
+									&Sep_total(k),Oct_total(k),&
 									&Nov_total(k),Dec_total(k)
 						write(38,3800)study_year,Jan_zdepth(k),Feb_zdepth(k),Mar_zdepth(k),Apr_zdepth(k),May_zdepth(k),Jun_zdepth(k),&
 									&Jul_zdepth(k),Aug_zdepth(k),Sep_zdepth(k),Oct_zdepth(k),&
@@ -693,10 +696,21 @@ write(*,nml=cdh_nml)
 		AbsAverageElevation = (sum(AvgElevation,k))/k
 !		write(200,*) i,j,latitude,longitude,sum(range_count,k),sum(count125,k)
 		
+		if (per76 .lt. 25) then
+			region = 1
+		elseif ((per76 .ge. 25) .and. (per76 .lt. 50)) then
+			region = 2
+		elseif ((per76 .ge. 50) .and. (per76 .lt.75)) then
+			region = 3
+		elseif (per76 .ge. 75) then
+			region = 4
+		endif
+		
+		
 		write(80,3600) i,j,latitude,longitude,AbsAverageElevation,total_mpercent,miss_total,annPercent_76,annCounter_76,avg_max_mean,&
 		&AvgMaxCount,abs_max,max_year,AvgFst7day,AvgLst7day,AvgFstLstDiff,sumflag,total_counter,total_max_reporting,&
 		TotalZeroReportYears,TotalReporting25  !	percent missing is wrtitten out here. 
-		write(81,3700) i,j,latitude,longitude,sum_range,tot_snwcover,per25,per50,per76,per125,per150
+		write(81,3700) i,j,latitude,longitude,sum_range,tot_snwcover,per25,per50,per76,per125,per150,region
 
 ! Write out the monthly averages here.
 		Jan_Mean = (sum(Jan_total,k))/k
@@ -759,11 +773,11 @@ write(*,nml=cdh_nml)
 		DMDecadeSum4 = ((sum(count76(33:42))/(sum(range_count(33:42)))))*100
 		DMDecadeSum5 = ((sum(count76(43:52))/(sum(range_count(43:52)))))*100
 
-		DMDecadeDif_1 = per76-DMDecadeSum1					! Calculating Percentage Anamolies
-		DMDecadeDif_2 = per76-DMDecadeSum2
-		DMDecadeDif_3 = per76-DMDecadeSum3
-		DMDecadeDif_4 = per76-DMDecadeSum4
-		DMDecadeDif_5 = per76-DMDecadeSum5
+		DMDecadeDif_1 = DMDecadeSum1 - per76				! Calculating Percentage Anamolies
+		DMDecadeDif_2 = DMDecadeSum2 - per76
+		DMDecadeDif_3 = DMDecadeSum3 - per76
+		DMDecadeDif_4 = DMDecadeSum4 - per76
+		DMDecadeDif_5 = DMDecadeSum5 - per76
 		!write(*,*) Decade
 		
 	!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Season Length	!!!!!!!!!!!!!!!!!!!!!!!!
@@ -774,20 +788,20 @@ write(*,nml=cdh_nml)
 		SLDecadeSum4 = ((sum(FstLstDiff(33:42)))/10)
 		SLDecadeSum5 = ((sum(FstLstDiff(43:52)))/10)
 		
-		SLDecadeDif_1 = AvgFstLstDiff-SLDecadeSum1					! Calculating  Anamolies
-		SLDecadeDif_2 = AvgFstLstDiff-SLDecadeSum2
-		SLDecadeDif_3 = AvgFstLstDiff-SLDecadeSum3
-		SLDecadeDif_4 = AvgFstLstDiff-SLDecadeSum4
-		SLDecadeDif_5 = AvgFstLstDiff-SLDecadeSum5		 !WRITE OUT
+		SLDecadeDif_1 = SLDecadeSum1- AvgFstLstDiff					! Calculating  Anamolies
+		SLDecadeDif_2 = SLDecadeSum2- AvgFstLstDiff
+		SLDecadeDif_3 = SLDecadeSum3- AvgFstLstDiff
+		SLDecadeDif_4 = SLDecadeSum4- AvgFstLstDiff
+		SLDecadeDif_5 = SLDecadeSum5- AvgFstLstDiff		 !WRITE OUT
 		
 		
 write(38,3810) "Percent Cover",Jan_zmean,Feb_zmean,Mar_zmean,Apr_zmean,May_zmean,&
 &Jun_zmean,Jul_zmean,Aug_zmean,Sep_zmean,Oct_zmean,Nov_zmean,Dec_zmean
 
 
-
-write(50,5010) "Mean",Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,May_Mean,Jun_Mean,Jul_Mean,&
-&Aug_Mean,Sep_Mean,Oct_Mean,Nov_Mean,Dec_Mean				
+write(50,5010) "Mean",Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,May_Mean,Jun_Mean,Sep_Mean,Oct_Mean,Nov_Mean,Dec_Mean	
+! write(50,5010) "Mean",Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,May_Mean,Jun_Mean,Jul_Mean,&
+! &Aug_Mean,Sep_Mean,Oct_Mean,Nov_Mean,Dec_Mean				
 ! write(50,5100) "Month","k","Mean","Total"
 ! write(50,5000) "January",k,Jan_Mean,Jan_total	
 ! write(50,5000) "February",k,Feb_Mean,Feb_total
@@ -868,15 +882,15 @@ write(85,8400) i,j,latitude,longitude,SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLD
  3500 format(I8,6(f16.2))
  3600 format(2(I5),2(f14.6),I6,4(f14.3),I14,f14.2,5(I14),2(f14.1),3(I6))
  3610 format(2(a5),2(a14),5(a14),a14,a14)
- 3700 format(2(I5),2(f12.4),I8,6(f8.2))
+ 3700 format(2(I5),2(f12.4),I8,6(f8.2),I8)
  3800 format(I14,12(f14.2))
  3810 format(a14,12(f14.2))
  3820 format(13(a14))
  4000 format(I11,2(f15.3),2(f20.3))
  4100 format(a11,2(a15))
- 5000 format(I10,12(f10.2))
- 5100 format(13(a10))
- 5010 format(a10,12(f10.2))
+ 5000 format(I10,10(f10.2))
+ 5100 format(11(a10))
+ 5010 format(a10,10(f10.2))
  8200 format(2(I5),2(f12.4),12(f12.2))
  8400 format(2(I5),2(f12.4),10(f12.2))
  !5100 format(a12,a6,2(a14))
