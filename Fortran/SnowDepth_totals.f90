@@ -29,11 +29,11 @@
 	  integer AbsAverageElevation,abs_min_elevation(52), AvgElevation(52),melt_length(52)
 	  integer melt_days,miss_depth,two_previous_snwd,snf_count_day,abs_max,max_year
 	  integer max_mean_year(52),last_recorded,FstLstDiff(52),AvgFstLstDiff,sum_range
-	  integer flag2,avg_max_mean,sum_rangeb,region
+	  integer flag2,avg_max_mean,sum_rangeb,region,leap_count,k_count(366),DOY
 	  real  Jan_count(52),Feb_count(52),Mar_count(52),Apr_count(52),May_count(52),Jun_count(52)
 	  real  Jul_count(52),Aug_count(52),Sep_count(52),Oct_count(52),Nov_count(52),Dec_count(52)	  
 !	  integer station_num,station_10,station_25,station_50,station_100
-	  real  longitude,latitude,yearReal,day_mean(365),day_median(365),mean_sum(365),median_sum(365)
+	  real  longitude,latitude,yearReal,day_mean(366),day_median(366),mean_sum(366),median_sum(366)
 	  real  zero_percent(52),gtzero_counter(52),counter_76(52),percent_76(52),miss_counter(52),miss_percent(52)
 	  real  miss_total, total_mpercent,total_counter,annCounter_76,annPercent_76
 	  real  Jan_total(52),Feb_total(52),Mar_total(52),Apr_total(52),May_total(52),Jun_total(52)
@@ -288,11 +288,13 @@ write(*,nml=cdh_nml)
 		
 		range_count(k) = 0.0
 		
-			do l = 1,365
+			do l = 1,366
 				day_mean(l) = 0
 				day_median(l) = 0
 				mean_sum(l) = 0
 				median_sum(l) = 0
+				k_count(l) = 0
+
 			enddo
 	enddo
 
@@ -362,7 +364,10 @@ write(*,nml=cdh_nml)
 		Sep_zzmean = 0
 		Oct_zzmean = 0
 		Nov_zzmean = 0
-		Dec_zzmean = 0		
+		Dec_zzmean = 0	
+
+		leap_count = 0
+		
 		do n = 1,5000	
 			read(25,1500,end=25)Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,&
 			&max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
@@ -383,8 +388,12 @@ write(*,nml=cdh_nml)
 						do l=1,366
 						!	write(200,*) "in leap"
 							total_counter = total_counter + 1
+
 !!!							write(200,*) total_counter,year,month,day,julian,count_day
 							if (mean_depth .NE. -99999) then
+								! if (julian .eq. 60) then
+									! leap_count = leap_count + 1
+								! endif
 								Non_miss_days(k) = Non_miss_days(k) + 1
 								Depth_mean(k) = Depth_mean(k) + mean_depth
 								if (mean_depth .gt. max_mean(k)) then
@@ -845,19 +854,20 @@ write(85,8400) i,j,latitude,longitude,SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLD
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 ! Taking sum of average snowfall on a given day for every year.
-
+		leap_count = 13
 		do k = 1,52
-			do l = 1,365
+			do l = 1,366
 				read(25,1500,end=26)Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,&
 					&max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
 					&station_25,station_50,station_100,NOAA_area
-				if ((month .eq. 2) .and. (day .eq. 29)) then
-					read(25,1500,end=26)Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,&
-					&max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
-					&station_25,station_50,station_100,NOAA_area
-				endif
+					 ! if ((month .eq. 2) .and. (day .eq. 29)) then
+						! read(25,1500,end=26)Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,&
+						! &max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
+						! &station_25,station_50,station_100,NOAA_area
+					 ! endif
 				if (julian .EQ. l) then
 					if (mean_depth .NE. -99999) then
+						k_count(l) = k_count(l) + 1
 						mean_sum(l) = mean_sum(l) + mean_depth
 						median_sum(l) = median_sum(l) + median_depth
 					endif
@@ -867,10 +877,21 @@ write(85,8400) i,j,latitude,longitude,SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLD
 		
 
 26		write(40,4100) "DayOfYear","MeanOfDay","MedianOfDay"				
-		do l = 1,365		! This may need to be redone becaue of leap year addition.
-			day_mean(l) = mean_sum(l)/k
-			day_median(l) = median_sum(l)/k
-			write(40,4000) l, mean_sum(l), day_mean(l), median_sum(l),day_median(l)
+		do l = 1,366		! This may need to be redone becaue of leap year addition.
+			DOY = l
+			if (l .eq. 60) then
+				! day_mean(l) = (mean_sum(l)/leap_count) * 0.1
+				! day_median(l) = (median_sum(l)/leap_count) * 0.1
+				continue
+			else
+				day_mean(l) = (mean_sum(l)/k_count(l))	* 0.1				! Put into cm.
+				day_median(l) = (median_sum(l)/k_count(l)) * 0.1
+				if (l .ge. 60) then
+					write(40,4000) DOY-1,day_mean(l),day_median(l),k_count(l)
+				else
+					write(40,4000) DOY,day_mean(l),day_median(l),k_count(l)	
+				endif
+			endif
 		enddo				
  		rewind(25)
 		
@@ -900,7 +921,7 @@ write(85,8400) i,j,latitude,longitude,SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLD
  3800 format(I14,12(f14.2))
  3810 format(a14,12(f14.2))
  3820 format(13(a14))
- 4000 format(I11,2(f15.3),2(f20.3))
+ 4000 format(I11,2(f15.3),I8)
  4100 format(a11,2(a15))
  5000 format(I10,10(f10.2))
  5100 format(11(a10))
