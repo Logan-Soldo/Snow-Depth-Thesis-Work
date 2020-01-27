@@ -302,8 +302,8 @@ write(*,nml=cdh_nml)
 		write(30,3100) "year","k","SnowDepthMean","MeanMax","MaxDay","MeltLength","MaxReporting"    !"Stations Reporting","Stations 10mm","Stations 25mm","Station 50mm","Station 100mm"
 		write(34,3410) "year","76Count","76Percent","MaxAbove76","First7day","Last7Days","DaysAbove76","flag"
 		write(35,3510) "year","Zero Count","Zero Percent","7.6 Count","7.6 Percent","Miss Count","Miss Percent"
-		write(38,3820) "year","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"
-		write(50,5100) "year","Jan","Feb","Mar","Apr","May","Jun","Sep","Oct","Nov","Dec"
+		write(38,3820) "year","Jan","Feb","Mar","Apr","Nov","Dec"
+		write(50,5100) "year","Jan","Feb","Mar","Apr","Nov","Dec"
 		! write(80,3610) "i","j","lat","lon","Miss Percent","Miss Count","Percent_76","Counter_76",&
 		! &"AvgMaxJulian","total_counter","max_reporting"     !percent missing is wrtitten out here. 
 		start_year = 1965				
@@ -416,7 +416,7 @@ write(*,nml=cdh_nml)
 								if ((julian .GE. 1) .AND. (julian .LE. 31)) then			! January
 									Jan_total(k) = Jan_total(k) + mean_depth
 									Jan_count(k) = Jan_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Jan_zdepth(k) = Jan_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Jan_zzdepth(k) = Jan_zzdepth(k) + 1
@@ -425,7 +425,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 32) .AND. (julian .LE. 60)) then       ! February
 									Feb_total(k) = Feb_total(k) + mean_depth
 									Feb_count(k) = Feb_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Feb_zdepth(k) = Feb_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Feb_zzdepth(k) = Feb_zzdepth(k) + 1
@@ -434,7 +434,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 61) .AND. (julian .LE. 91)) then		! March
 									Mar_total(k) = Mar_total(k) + mean_depth
 									Mar_count(k) = Mar_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Mar_zdepth(k) = Mar_zdepth(k) + 1	
 										if (mean_depth .ge. 76) then
 											Mar_zzdepth(k) = Mar_zzdepth(k) + 1
@@ -443,7 +443,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 92) .AND. (julian .LE. 121)) then		! April
 									Apr_total(k) = Apr_total(k) + mean_depth
 									Apr_count(k) = Apr_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Apr_zdepth(k) = Apr_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Apr_zzdepth(k) = Apr_zzdepth(k) + 1
@@ -452,7 +452,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 122) .AND. (julian .LE. 152)) then		! May
 									May_total(k) = May_total(k) + mean_depth
 									May_count(k) = May_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										May_zdepth(k) = May_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											May_zzdepth(k) = May_zzdepth(k) + 1
@@ -461,7 +461,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 153) .AND. (julian .LE. 182)) then		! June
 									Jun_total(k) = Jun_total(k) + mean_depth
 									Jun_count(k) = Jun_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Jun_zdepth(k) = Jun_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Jun_zzdepth(k) = Jun_zzdepth(k) + 1
@@ -470,7 +470,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 183) .AND. (julian .LE. 213)) then		! July
 									Jul_total(k) = Jul_total(k) + mean_depth
 									Jul_count(k) = Jul_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Jul_zdepth(k) = Jul_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Jul_zzdepth(k) = Jul_zzdepth(k) + 1
@@ -479,7 +479,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 214) .AND. (julian .LE. 244)) then		! August
 									Aug_total(k) = Aug_total(k) + mean_depth
 									Aug_count(k) = Aug_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Aug_zdepth(k) = Aug_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Aug_zzdepth(k) = Aug_zzdepth(k) + 1
@@ -488,7 +488,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 245) .AND. (julian .LE. 274)) then		! September
 									Sep_total(k) = Sep_total(k) + mean_depth
 									Sep_count(k) = Sep_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Sep_zdepth(k) = Sep_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Sep_zzdepth(k) = Sep_zzdepth(k) + 1
@@ -497,7 +497,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 275) .AND. (julian .LE. 305)) then		! October
 									Oct_total(k) = Oct_total(k) + mean_depth
 									Oct_count(k) = Oct_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Oct_zdepth(k) = Oct_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Oct_zzdepth(k) = Oct_zzdepth(k) + 1
@@ -506,7 +506,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 306) .AND. (julian .LE. 335)) then		! November
 									Nov_total(k) = Nov_total(k) + mean_depth									
 									Nov_count(k) = Nov_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Nov_zdepth(k) = Nov_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Nov_zzdepth(k) = Nov_zzdepth(k) + 1
@@ -515,7 +515,7 @@ write(*,nml=cdh_nml)
 								elseif ((julian .GE. 336) .AND. (julian .LE. 366)) then		! December
 									Dec_total(k) = Dec_total(k) + mean_depth	
 									Dec_count(k) = Dec_count(k) + 1
-									if (mean_depth .gt. 0) then
+									if (mean_depth .gt. 25.4) then
 										Dec_zdepth(k) = Dec_zdepth(k) + 1
 										if (mean_depth .ge. 76) then
 											Dec_zzdepth(k) = Dec_zzdepth(k) + 1
@@ -660,11 +660,9 @@ write(*,nml=cdh_nml)
 						! write(50,5000) study_year,Jan_total(k),Feb_total(k),Mar_total(k),Apr_total(k),May_total(k),Jun_total(k),&
 									! &Jul_total(k),Aug_total(k),Sep_total(k),Oct_total(k),&
 									! &Nov_total(k),Dec_total(k)
-						write(50,5000) study_year,Jan_total(k),Feb_total(k),Mar_total(k),Apr_total(k),May_total(k),Jun_total(k),&
-									&Sep_total(k),Oct_total(k),&
+						write(50,5000) study_year,Jan_total(k),Feb_total(k),Mar_total(k),Apr_total(k),&
 									&Nov_total(k),Dec_total(k)
-						write(38,3800)study_year,Jan_zdepth(k),Feb_zdepth(k),Mar_zdepth(k),Apr_zdepth(k),May_zdepth(k),Jun_zdepth(k),&
-									&Jul_zdepth(k),Aug_zdepth(k),Sep_zdepth(k),Oct_zdepth(k),&
+						write(38,3800)study_year,Jan_zdepth(k),Feb_zdepth(k),Mar_zdepth(k),Apr_zdepth(k),&
 									&Nov_zdepth(k),Dec_zdepth(k)
 									
 						study_year = study_year + 1
@@ -818,11 +816,11 @@ write(*,nml=cdh_nml)
 		SLDecadeDif_5 = SLDecadeSum5- AvgFstLstDiff		 !WRITE OUT
 		
 		
-write(38,3810) "Percent Cover",Jan_zmean,Feb_zmean,Mar_zmean,Apr_zmean,May_zmean,&
-&Jun_zmean,Jul_zmean,Aug_zmean,Sep_zmean,Oct_zmean,Nov_zmean,Dec_zmean
+write(38,3810) "Percent Cover",Jan_zmean,Feb_zmean,Mar_zmean,Apr_zmean,&
+&Nov_zmean,Dec_zmean
 
 
-write(50,5010) "Mean",Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,May_Mean,Jun_Mean,Sep_Mean,Oct_Mean,Nov_Mean,Dec_Mean	
+write(50,5010) "Mean",Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,Nov_Mean,Dec_Mean	
 ! write(50,5010) "Mean",Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,May_Mean,Jun_Mean,Jul_Mean,&
 ! &Aug_Mean,Sep_Mean,Oct_Mean,Nov_Mean,Dec_Mean				
 ! write(50,5100) "Month","k","Mean","Total"
