@@ -885,9 +885,9 @@ write(85,8400) i,j,latitude,longitude,SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLD
 				day_mean(l) = (mean_sum(l)/k_count(l))	* 0.1				! Put into cm.
 				day_median(l) = (median_sum(l)/k_count(l)) * 0.1
 				if (l .ge. 60) then
-					write(40,4000) DOY-1,day_mean(l),day_median(l),k_count(l)
+					write(40,4000) DOY-1,day_mean(l),day_median(l)
 				else
-					write(40,4000) DOY,day_mean(l),day_median(l),k_count(l)	
+					write(40,4000) DOY,day_mean(l),day_median(l)
 				endif
 			endif
 		enddo				
