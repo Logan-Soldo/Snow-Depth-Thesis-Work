@@ -7,8 +7,9 @@ from scipy.stats import linregress
 from scipy.stats import stats
 
 
-def read_file(CellList,filelist,input_location):
+def read_file(CellList,filelist,region_select,input_location):
     while True:
+        filelist = []
         if input_location == "1":
             list_files = ["76SnowDepth.txt","DaySnowDepth.txt","MeanSnowDepth.txt"
                           ,"MonthlyAverage.txt","SDQuality.txt","SeasonalSnowDepth.txt",
@@ -16,10 +17,23 @@ def read_file(CellList,filelist,input_location):
             print(list_files)
             file = input("Input a file name: ")               
             try:   
-                for cell in CellList:            
-                    open("U:\Research\SnowDepth_Data\Outputs\%s\SnowDepth\%s_%s" %(cell,cell,file))
-                    filelist.append("U:\Research\SnowDepth_Data\Outputs\%s\SnowDepth\%s_%s" %(cell,cell,file))
-    #            print(filelist)
+                if region_select == "5":
+            #        print(CellList)
+                    for i in CellList:
+                        temp_list = []
+                        for cell in i:
+                         #   print(cell)
+                            flist = open("U:\Research\SnowDepth_Data\Outputs\%s\SnowDepth\%s_%s" %(cell,cell,file))
+                            temp_list.append(flist)
+                   #     print(temp_list)
+                        filelist.append(temp_list)
+
+                #    print(filelist)
+                else:
+                    for cell in CellList:            
+                        open("U:\Research\SnowDepth_Data\Outputs\%s\SnowDepth\%s_%s" %(cell,cell,file))
+                        filelist.append("U:\Research\SnowDepth_Data\Outputs\%s\SnowDepth\%s_%s" %(cell,cell,file))
+                #print(filelist)                        
                 return file,filelist
             except FileNotFoundError:
                 print("file doesn't exist")
@@ -28,9 +42,7 @@ def read_file(CellList,filelist,input_location):
             print(list_files)
             file = input("Input a file name: ") 
             try:
-   #             print(file)  
-
-                filelist = pd.read_fwf("U:\Research\SnowDepth_Data\Outputs\All\PercentMiss\%s" %(file),header=None)
+                filelist = pd.read_fwf("U:\Research\SnowDepth_Data\Outputs\All\PercentMiss\%s" %(file),header=None)                  
  #               print(filelist)
   #              print(file)
                 return file,filelist
@@ -54,19 +66,40 @@ def region_define(region_select):
     CellList = cell_reg.tolist()
     
     return CellList
-def get_header(filelist):
-    for f in filelist:
-        f_open= open(f)
-        line = f_open.readline()
+
+def all_region(region_select):
+    CellList = []
+    reg_file = pd.read_fwf("U:\Research\SnowDepth_Data\Outputs\All\PercentMiss\AllPercent_Depth.txt",header=None)
+    
+    for i in range(4):
+        sort_region = reg_file.loc[reg_file[11] == int(i+1)]
+        cell_reg = sort_region[0].astype(str) +sort_region[1].astype(str)
+        datalist = cell_reg.tolist()
+        CellList.append(datalist)
+    return CellList
+        
+    
+def get_header(filelist,region_select):
     header=[]
-   # print(line)
-    split_line = line.split()
-  #  print(split_line)
-    for l in line:
-        header.append(split_line[1])
-    header = header[0]
-    f_open.close()
+    if region_select == "5":
+    
+        for f in filelist:
+              #  print(f)
+              for i in f:
+                line = i.readline()
+                split_line = line.split()
+    else:
+        for f in filelist:
+            f_open= open(f)
+            line = f_open.readline()
+        header=[]
+        split_line = line.split()
+        for l in line:
+            header.append(split_line[1])
+        header = header[0]
+        f_open.close()
     return header,line,split_line
+
 
 def pick_var(var):
     while True:
@@ -154,24 +187,31 @@ def Plot76(filelist,header,plt_index,selection,region):           # Added global
     Gen_plot(x,y_list,selection,header,region)
     return figname
 
-def Day_mean(filelist,header,plt_index,selection,region):                  # Added global plotting
-    
+def Day_mean(filelist,header,plt_index,selection,region):                  # Added global plotting    
+   # print(filelist)
     y_list = []
     for fname in filelist:
+        data_list = []
+    #    print(fname)
         try:
-            data=np.loadtxt(fname,skiprows=1)
-          #  plt.title(header)
-            x = data[:,0]
-            y_temp = data[:,plt_index]
-            y_list.append(y_temp)
-      #      plt.plot(x,y,label=fname[35:39])
+            for f in fname:
+                data=np.loadtxt(f,skiprows=1)
+                data_list.append(data)
+              #  plt.title(header)
+#                x = data[:,0]
+#                y_temp = data[:,plt_index]
+#                y_list.append(y_temp)
+          #      plt.plot(x,y,label=fname[35:39])
+            print(len(data_list))
+            y_list.append(data_list)
         except IOError:
             continue
-    
-    title,yaxis,xaxis,figname = plt_select1(selection,header,region,y_list)
+   # print(len(y_list))
+  #  print(np.array(data_list).tolist())
+    title,yaxis,xaxis,figname = plt_select1(selection,header,region,data_list)
     yaxis = "Snow Depth(cm)"
     xaxis = "Day of Year"
-    Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title)
+    Day_plot(title,y_list,selection,header,region,xaxis,yaxis)
     return figname
     
 def plt_select1(selection,header,region,data_list):
@@ -237,6 +277,8 @@ def Month_plot(title,data_list,header,yaxis,xaxis,input3):
             ymax = np.max(y_list,axis=0)
             per_90 = np.percentile(y_list,90,axis=0)
             per_10 = np.percentile(y_list,10,axis=0)
+            per75 = np.percentile(y_list,75,axis=0)
+            per25 = np.percentile(y_list,25,axis=0)
     
             regress = linregress(x,y)
             lin_m = regress.slope
@@ -250,7 +292,7 @@ def Month_plot(title,data_list,header,yaxis,xaxis,input3):
         
         sub[i].set_xlim(1966,2017)
         if input3 != "MonthAboveX.txt":
-            sub[i].set_ylim(bottom=0,top=max(ymax)+100)
+            sub[i].set_ylim(bottom=0,top=max(per75)+100)
         else:
             sub[i].set_ylim(bottom=0,top=32)
             
@@ -263,19 +305,82 @@ def Month_plot(title,data_list,header,yaxis,xaxis,input3):
       
         #  sub[i].labelsize('medium')
         sub[i].set_title(label=months[i])
-        sub[i].scatter(x,ymax,s=10)
-        sub[i].scatter(x,ymin,s=10)
+        sub[i].grid()
+#        sub[i].scatter(x,ymax,s=8,c="black")
+#        sub[i].scatter(x,ymin,s=8,c="black")
         sub[i].plot(x,y,color=c[0],label="Average",linewidth="2") # change to "Average"?
         if header != "MeanOfDay":
             reg_plot = sub[i].plot(x,lin_m*x+lin_b,color=c[0],label="Linear Regression",linewidth="2",linestyle="dashed")   # Regression of average
     #    sub[i].plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
      #   sub[i].plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
-        sub[i].fill_between(x, per_10, per_90, alpha=0.25, linewidth=0, color=c[0])
-#        sub[i].plot(x,10_per,color=c[1],label="10Per",linewidth="2",linestyle="dashed")
-#        sub[i].plot(x,90_per,color=c[1],label="90Per",linewidth="2",linestyle="dashed")
-        sub[i].grid()
+        sub[i].fill_between(x, per25, per75, alpha=0.25, linewidth=0, color=c[0])
+
    #     sub[i].legend(r_round,reg_plot)
 
+def Day_plot(title,y_list,selection,header,region,xaxis,yaxis):
+
+   # print(data_list)
+    c = color_select()
+    for i in range(len(c)):
+        r,g,b = c[i]
+        c[i] = (r / 255., g / 255., b / 255.)
+    print(len(y_list))
+#    print(len(y_list[0]))
+    plt.rc('font', family='serif')  
+    plt.rc('xtick', labelsize='x-small')
+    plt.rc('ytick', labelsize='x-small')    
+    
+    plt.figure(figsize=(12,8))    
+    plt.title(title,fontsize=12)                    # Plotting title from above
+    plt.grid()
+
+    count = 0
+
+    for j in y_list:
+        y2_list = []
+        y=[]
+        ymin = []
+        ymax= []
+
+    #    plt.xticks(range(1966,2017,5),fontsize=10)
+        plt.yticks(fontsize=10)
+       # plt.plot(xnew,f2(xnew),color=c[0],label="Average",markevery=100) # change to "Average"?
+        region_lab = "Region %s" %(count+1)        
+        for k in j:
+           # print(len(j))
+        #    print(i)
+            x=k[:,0]
+            y_temp = k[:,1]          # plt_index gets its index when variable is chosen by user.
+            y2_list.append(y_temp)
+            y2_list = np.array(y2_list).tolist()
+            y = np.mean(y2_list,axis=0)
+            ymin = np.min(y2_list,axis=0)
+            ymax = np.max(y2_list,axis=0)
+#            per_90 = np.percentile(y2_list,90,axis=0)
+#            per_10 = np.percentile(y2_list,10,axis=0)
+            per75 = np.percentile(y2_list,75,axis=0)
+            per25 = np.percentile(y2_list,25,axis=0)            
+            
+            regress = linregress(x,y)
+            lin_m = regress.slope
+            lin_b = regress.intercept
+            lin_r = stats.pearsonr(x,y)
+
+        plt.plot(x,y,color=c[count],label=region_lab,linewidth="2",markevery=100) # change to "Average"?
+        if header != "MeanOfDay":
+            plt.plot(x,lin_m*x+lin_b,color=c[j],label="Linear Regression",linewidth="2",linestyle="dashed")   # Regression of average
+        plt.fill_between(x, per25, per75, alpha=0.25, linewidth=0, color=c[count])        
+        
+        count += 1
+
+    plt.ylabel(yaxis,fontsize=12)                  # Needs to be changed for every plot.
+    plt.xlabel(xaxis,fontsize=12)
+    plt.xticks(range(1,365,10),fontsize=10,rotation=45)
+    plt.yticks(range(0,40,5),fontsize=10)
+    plt.xlim(1,365)
+    plt.ylim(0,40) 
+    plt.legend(fontsize=10)
+        
 def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
     y=[]
     fname_lst = []
@@ -326,7 +431,7 @@ def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
 #    plt.plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
 #    plt.plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
     plt.legend(fontsize=10)
-        
+
 
 def savefig(figname):    
     plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.pdf" %(figname))  # Need to vary this formatting between graphics.
@@ -405,14 +510,16 @@ def main():
                         elif selection.lower() == "column":
                             CellList = col_file(Blacklist,input1,input2)
             elif selection == "region":
-                region_select = input("Select a region between 1-4: ")
+                region_select = input("Select a region between 1-4 or 5 for all regions: ")
                 if region_select.lower() == 'end':
                     break
-                else:
+                elif int(region_select) < 5:
                     CellList = region_define(region_select)
+                else:
+                    CellList = all_region(region_select)
             
-            input3,filelist = read_file(CellList,filelist,input_location)            
-            header,var,split_line = get_header(filelist)        
+            input3,filelist = read_file(CellList,filelist,region_select,input_location)            
+            header,var,split_line = get_header(filelist,region_select)        
             print(var)        
             
             if input3 == "MonthlyAverage.txt":
@@ -432,13 +539,13 @@ def main():
                 header,plt_index = pick_var(split_line)             # Subplot changes should begin here.                         
                 figname = Day_mean(filelist,header,plt_index,selection,region_select)
                 savefig(figname)
-
    #             plt.show()
 #                plt.clf()
             elif input3 == "MeanSnowDepth.txt":
                 header,plt_index = pick_var(split_line)             # Subplot changes should begin here.                           
                 figname = SnowDepthMean(filelist,header,plt_index,split_line)
                 savefig(figname)
+                
             elif input3== "MonthAboveX.txt":
                 figname = Set_Month(filelist,header,input3,selection,region_select)                
                 savefig(figname)                
