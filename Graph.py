@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import AutoMinorLocator
 import pandas as pd
+import math
 from scipy.interpolate import interp1d as interp
 from scipy.stats import linregress
 from scipy.stats import stats
@@ -139,16 +140,24 @@ def total_file(Blacklist):
                 CellList.append(str(i)+str(j))
     return CellList
 
-def title_gen():
-    title = input("Input a title for this graph: ")
+def title_gen(input3,region):
+    if input3 == "MonthlyAverage.txt":
+        title = "Average Monthly Sum of Snow Depth: Region %s" %(region)
+        savefig = "R%sMonthlyDepth" %(region)
+    elif input3 == "MonthAboveX.txt":
+        title = "Sum of Days Above 2.54cm: Region %s" %(region)
+        savefig = "SOD_R%s" %(region)
+    elif input3 == "DaySnowDepth.txt":
+        title = "Average Daily Snow Depth: 1966-2018"
+        savefig = "DayDepth"
+
     xaxis = "test"
     yaxis = "test"
-    savefig = input("Input a file name: ")
     return title,yaxis,xaxis,savefig
 
 
 ######## Below this are all of the plotting functions. ##########
-def Set_Month(filelist,header,input3,selection,region):               # Use this example for global plotting application
+def Set_Month(filelist,header,input3,selection,region_select):               # Use this example for global plotting application
     '''
     Introducing subplotting here as a demo.
     '''
@@ -160,17 +169,17 @@ def Set_Month(filelist,header,input3,selection,region):               # Use this
         except IOError:
             continue
 
-    title,yaxis,xaxis,figname = plt_select1(selection,header,region,data_list)
+    title,yaxis,xaxis,figname = plt_select1(selection,header,data_list,input3,region_select)
     if input3 != "MonthAboveX.txt":
         yaxis = "Sum of Snow\nDepth(cm)"
         xaxis = "Year"
     else:
         yaxis = "Days"
         xaxis = "Year"
-    Month_plot(title,data_list,header,yaxis,xaxis,input3)
+    Month_plot(title,data_list,header,yaxis,xaxis,input3,region_select)
     return figname
     
-def Plot76(filelist,header,plt_index,selection,region):           # Added global plotting     
+def Plot76(filelist,header,plt_index,selection,region_select,input3):           # Added global plotting     
     y_list = []
     for fname in filelist:
         try:
@@ -183,11 +192,11 @@ def Plot76(filelist,header,plt_index,selection,region):           # Added global
         except IOError:
             continue
     
-    title,yaxis,xaxis,figname = plt_select1(x,y_list,selection,header,region)
-    Gen_plot(x,y_list,selection,header,region)
+    title,yaxis,xaxis,figname = plt_select1(x,y_list,selection,header,input3,region_select)
+    Gen_plot(x,y_list,selection,header,region_select)
     return figname
 
-def Day_mean(filelist,header,plt_index,selection,region):                  # Added global plotting    
+def Day_mean(filelist,header,plt_index,selection,region_select,input3):                  # Added global plotting    
    # print(filelist)
     y_list = []
     for fname in filelist:
@@ -197,24 +206,19 @@ def Day_mean(filelist,header,plt_index,selection,region):                  # Add
             for f in fname:
                 data=np.loadtxt(f,skiprows=1)
                 data_list.append(data)
-              #  plt.title(header)
-#                x = data[:,0]
-#                y_temp = data[:,plt_index]
-#                y_list.append(y_temp)
-          #      plt.plot(x,y,label=fname[35:39])
             print(len(data_list))
             y_list.append(data_list)
         except IOError:
             continue
    # print(len(y_list))
   #  print(np.array(data_list).tolist())
-    title,yaxis,xaxis,figname = plt_select1(selection,header,region,data_list)
+    title,yaxis,xaxis,figname = plt_select1(selection,header,data_list,input3,region_select)
     yaxis = "Snow Depth(cm)"
     xaxis = "Day of Year"
-    Day_plot(title,y_list,selection,header,region,xaxis,yaxis)
+    Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis)
     return figname
     
-def plt_select1(selection,header,region,data_list):
+def plt_select1(selection,header,data_list,input3,region_select):
     fname_lst = []
     generate_title = input("Would you like to generate a title? (y/n): ")    
     if generate_title == "n":
@@ -222,19 +226,19 @@ def plt_select1(selection,header,region,data_list):
             title = header + " "+ selection + " " + "Cells"
             yaxis = "test"
             xaxis = "test"            
-            figname = input("Input a file name: ")
+            figname = "test"
         elif selection == "region":
-             title = header + " "+ "Region" + " " + region 
+             title = header + " "+ "Region" + " " + region_select 
              yaxis = "test"
              xaxis = "test"             
-             figname = input("Input a file name: ")
+             figname = "test"
         else:
             title = header + " "+ selection + " " + "%s to %s" %(fname_lst[0],fname_lst[-1])
             yaxis = "test"
             xaxis = "test"
-            figname = input("Input a file name: ")
+            figname = "test"
     else:
-        title,yaxis,xaxis,figname = title_gen()
+        title,yaxis,xaxis,figname = title_gen(input3,region_select)
     
 
     plt.rc('font', family='serif')  
@@ -243,7 +247,7 @@ def plt_select1(selection,header,region,data_list):
 
     return title,yaxis,xaxis,figname    
  
-def Month_plot(title,data_list,header,yaxis,xaxis,input3):
+def Month_plot(title,data_list,header,yaxis,xaxis,input3,region):
     '''
     Used for plotting Monthly Data, use this as an example for future
     figures that will require subplots.
@@ -258,10 +262,20 @@ def Month_plot(title,data_list,header,yaxis,xaxis,input3):
         r,g,b = c[i]
         c[i] = (r / 255., g / 255., b / 255.)
         
-    months = ["January","February","March","April","November","December"]
+    months = ["November","December","January","February","March","April"]
     sub = sub.ravel()  
  #   sub = fig.add_subplot(221)
-
+    if region == "1":
+        color = c[0]
+    elif region == "2":
+        color = c[1]
+    elif region == "3":
+        color = c[2]
+        #color = "black"
+    elif region == "4":
+        color = c[3]
+    
+    print("% Change","CPD","APC","P-Value")    
     for i in range(6):
         y_list = []
         y=[]
@@ -272,52 +286,80 @@ def Month_plot(title,data_list,header,yaxis,xaxis,input3):
             y_temp = j[:,i+1]          # plt_index gets its index when variable is chosen by user.
             y_list.append(y_temp)
             y_list = np.array(y_list).tolist()
-            y = np.mean(y_list,axis=0)
-            ymin = np.min(y_list,axis=0)
-            ymax = np.max(y_list,axis=0)
-            per_90 = np.percentile(y_list,90,axis=0)
-            per_10 = np.percentile(y_list,10,axis=0)
-            per75 = np.percentile(y_list,75,axis=0)
-            per25 = np.percentile(y_list,25,axis=0)
-    
-            regress = linregress(x,y)
-            lin_m = regress.slope
-            lin_b = regress.intercept
+            
+        y = np.mean(y_list,axis=0)
+        ymin = np.min(y_list,axis=0)
+        ymax = np.max(y_list,axis=0)
+        per_90 = np.percentile(y_list,90,axis=0)
+        per_10 = np.percentile(y_list,10,axis=0)
+        per75 = np.percentile(y_list,75,axis=0)
+        per25 = np.percentile(y_list,25,axis=0)
+        
+        #print(y)
+        regress = linregress(x,y)
+        lin_m = regress.slope
+   #     ROC = (lin_m/np.mean(y))*100   # Likely not the proper method.
+           
+        lin_b = regress.intercept
 #            lin_r = stats.pearsonr(x,y)
-#            r_round = round(lin_r[0],3)
-#            r2_round = round(lin_r[1],3)
-        #    print(r_round)
-
+        lin_r = regress.rvalue
+        r_round = round(lin_r,3)
+        lin_p = regress.pvalue
+#        print(lin_m, lin_b,lin_r,lin_p)
+#
+        y_2018 = (lin_m*2018) + lin_b
+        y_1966 = (lin_m*1966) + lin_b
+        PerROC = ((y_2018 - y_1966)/y_1966) * 100       # Percent Change start to end
+        CPD = lin_m * 10                                # Change per Decade
+        APC = 100* (math.exp(lin_m)-1)
+        
 #            m_round = round(m,3)            
+        print('{:.4}'.format(PerROC)+'%','{:.4}'.format(CPD),'{:.4}'.format(APC),'{:.4}'.format(lin_p))
+  #      print(PerROC)
         
         sub[i].set_xlim(1966,2017)
         if input3 != "MonthAboveX.txt":
-            sub[i].set_ylim(bottom=0,top=max(per75)+100)
+            sub[i].set_ylim(bottom=0,top=max(per75)+200)
+            textstr = '\n'.join((
+                    'Percent Change=%.2f'% (PerROC, )+'%',
+                    '%.2f (cm/decade)' % (CPD, ),
+                    'P-Value= %.2f' % (lin_p, )))
         else:
-            sub[i].set_ylim(bottom=0,top=32)
-            
+            sub[i].set_ylim(bottom=0,top=40)
+            sub[i].set_yticks(range(0,31))
+            textstr = '\n'.join((
+                    'Percent Change=%.2f'% (PerROC, )+'%',
+                    '%.2f (days/decade)' % (CPD, ),
+                    'P-Value= %.2f' % (lin_p, )))            
 
+
+        
         sub[i].set_xticks(range(1966,2017,5))#,fontsize=8)
         sub[i].set_xticklabels(range(1966,2017,5),fontsize=10) 
-        sub[i].locator_params(axis="y",tight=True,nbins=8)   # change nbins integer to reduce number of y ticks
+        sub[i].locator_params(axis="y",tight=True,nbins=10)   # change nbins integer to reduce number of y ticks
         sub[i].tick_params(axis="y",labelsize=10)                  # Needs to be changed for every plot.
+        sub[i].xaxis.set_minor_locator(AutoMinorLocator(5))
         sub[i].set_ylabel(yaxis,fontsize=10,multialignment="center")
-      
+        
         #  sub[i].labelsize('medium')
         sub[i].set_title(label=months[i])
         sub[i].grid()
 #        sub[i].scatter(x,ymax,s=8,c="black")
 #        sub[i].scatter(x,ymin,s=8,c="black")
-        sub[i].plot(x,y,color=c[0],label="Average",linewidth="2") # change to "Average"?
+        sub[i].plot(x,y,color=color,label="Average",linewidth="2") # change to "Average"?
         if header != "MeanOfDay":
-            reg_plot = sub[i].plot(x,lin_m*x+lin_b,color=c[0],label="Linear Regression",linewidth="2",linestyle="dashed")   # Regression of average
+            reg_plot = sub[i].plot(x,lin_m*x+lin_b,color="black",label="R-Value={}".format(r_round),linewidth="2",linestyle="dashed")   # Regression of average
     #    sub[i].plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
      #   sub[i].plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
-        sub[i].fill_between(x, per25, per75, alpha=0.25, linewidth=0, color=c[0])
+        sub[i].fill_between(x, per25, per75, alpha=0.35, linewidth=0, color=color)
 
-   #     sub[i].legend(r_round,reg_plot)
+       # sub[i].legend(r_round,reg_plot)
+       # sub[i].legend(plot,reg_plot)
+        props = dict(boxstyle='round', facecolor='white', alpha=0.7)
+        sub[i].text(0.98, 0.95, textstr,transform=sub[i].transAxes,bbox=props,
+           va = "top",ha="right" )
 
-def Day_plot(title,y_list,selection,header,region,xaxis,yaxis):
+def Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis):
 
    # print(data_list)
     c = color_select()
@@ -476,7 +518,8 @@ def color_select():
     tableau20blind = [(0, 107, 164), (255, 128, 14), (171, 171, 171), (89, 89, 89),
              (95, 158, 209), (200, 82, 0), (137, 137, 137), (163, 200, 236),
              (255, 188, 121), (207, 207, 207)]
-    return tableau20blind
+    color_blind = [(215,25,28),(253,174,97),(145,191,219),(44,123,182)]
+    return color_blind
 
 
 def main():
@@ -537,7 +580,7 @@ def main():
   #              plt.clf()
             elif input3 == "DaySnowDepth.txt":  # Goal is to get 4 subplots for this file with a plot for each region.
                 header,plt_index = pick_var(split_line)             # Subplot changes should begin here.                         
-                figname = Day_mean(filelist,header,plt_index,selection,region_select)
+                figname = Day_mean(filelist,header,plt_index,selection,region_select,input3)
                 savefig(figname)
    #             plt.show()
 #                plt.clf()
