@@ -302,8 +302,8 @@ write(*,nml=cdh_nml)
 		write(30,3100) "year","k","SnowDepthMean","MeanMax","MaxDay","MeltLength","MaxReporting"    !"Stations Reporting","Stations 10mm","Stations 25mm","Station 50mm","Station 100mm"
 		write(34,3410) "year","76Count","76Percent","MaxAbove76","First7day","Last7Days","DaysAbove76","flag"
 		write(35,3510) "year","Zero Count","Zero Percent","7.6 Count","7.6 Percent","Miss Count","Miss Percent"
-		write(38,3820) "year","Jan","Feb","Mar","Apr","Nov","Dec"
-		write(50,5100) "year","Jan","Feb","Mar","Apr","Nov","Dec"
+		write(38,3820) "year","Nov","Dec","Jan","Feb","Mar","Apr"
+		write(50,5100) "year","Nov","Dec","Jan","Feb","Mar","Apr"
 		! write(80,3610) "i","j","lat","lon","Miss Percent","Miss Count","Percent_76","Counter_76",&
 		! &"AvgMaxJulian","total_counter","max_reporting"     !percent missing is wrtitten out here. 
 		start_year = 1965				
@@ -660,10 +660,11 @@ write(*,nml=cdh_nml)
 						! write(50,5000) study_year,Jan_total(k),Feb_total(k),Mar_total(k),Apr_total(k),May_total(k),Jun_total(k),&
 									! &Jul_total(k),Aug_total(k),Sep_total(k),Oct_total(k),&
 									! &Nov_total(k),Dec_total(k)
-						write(50,5000) study_year,Jan_total(k),Feb_total(k),Mar_total(k),Apr_total(k),&
-									&Nov_total(k),Dec_total(k)
-						write(38,3800)study_year,Jan_zdepth(k),Feb_zdepth(k),Mar_zdepth(k),Apr_zdepth(k),&
-									&Nov_zdepth(k),Dec_zdepth(k)
+						write(50,5000) study_year,Nov_total(k),Dec_total(k),Jan_total(k),Feb_total(k),&
+									&Mar_total(k),Apr_total(k)
+									
+						write(38,3800)study_year,Nov_zdepth(k),Dec_zdepth(k),Jan_zdepth(k),Feb_zdepth(k),&
+									&Mar_zdepth(k),Apr_zdepth(k)
 									
 						study_year = study_year + 1
 					enddo ! end year loop						
@@ -727,7 +728,8 @@ write(*,nml=cdh_nml)
 			region = 4
 		endif
 		
-		
+		abs_max = abs_max *0.1
+
 		write(80,3600) i,j,latitude,longitude,AbsAverageElevation,total_mpercent,miss_total,annPercent_76,annCounter_76,avg_max_mean,&
 		&AvgMaxCount,abs_max,max_year,AvgFst7day,AvgLst7day,AvgFstLstDiff,sumflag,total_counter,total_max_reporting,&
 		TotalZeroReportYears,TotalReporting25  !	percent missing is wrtitten out here. 
@@ -816,11 +818,11 @@ write(*,nml=cdh_nml)
 		SLDecadeDif_5 = SLDecadeSum5- AvgFstLstDiff		 !WRITE OUT
 		
 		
-write(38,3810) "Percent Cover",Jan_zmean,Feb_zmean,Mar_zmean,Apr_zmean,&
-&Nov_zmean,Dec_zmean
+write(38,3810) "Percent Cover",Nov_zmean,Dec_zmean,Jan_zmean,Feb_zmean,&
+&Mar_zmean,Apr_zmean
 
 
-write(50,5010) "Mean",Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,Nov_Mean,Dec_Mean	
+write(50,5010) "Mean",Nov_Mean,Dec_Mean,Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean	
 ! write(50,5010) "Mean",Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,May_Mean,Jun_Mean,Jul_Mean,&
 ! &Aug_Mean,Sep_Mean,Oct_Mean,Nov_Mean,Dec_Mean				
 ! write(50,5100) "Month","k","Mean","Total"
