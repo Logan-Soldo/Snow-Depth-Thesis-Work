@@ -9,6 +9,11 @@ from scipy.stats import stats
 
 
 def read_file(CellList,filelist,region_select,input_location):
+    '''
+    Here is where the files are read and added to a list to be analyzed. 
+    The output "celllist" is produced depending on the inputs by the user 
+    and the files that they select.
+    '''
     while True:
         filelist = []
         if input_location == "1":
@@ -19,22 +24,16 @@ def read_file(CellList,filelist,region_select,input_location):
             file = input("Input a file name: ")               
             try:   
                 if region_select == "5":
-            #        print(CellList)
                     for i in CellList:
                         temp_list = []
                         for cell in i:
-                         #   print(cell)
                             flist = open("U:\Research\SnowDepth_Data\Outputs\%s\SnowDepth\%s_%s" %(cell,cell,file))
                             temp_list.append(flist)
-                   #     print(temp_list)
                         filelist.append(temp_list)
-
-                #    print(filelist)
                 else:
                     for cell in CellList:            
                         open("U:\Research\SnowDepth_Data\Outputs\%s\SnowDepth\%s_%s" %(cell,cell,file))
                         filelist.append("U:\Research\SnowDepth_Data\Outputs\%s\SnowDepth\%s_%s" %(cell,cell,file))
-                #print(filelist)                        
                 return file,filelist
             except FileNotFoundError:
                 print("file doesn't exist")
@@ -44,11 +43,8 @@ def read_file(CellList,filelist,region_select,input_location):
             file = input("Input a file name: ") 
             try:
                 filelist = pd.read_fwf("U:\Research\SnowDepth_Data\Outputs\All\PercentMiss\%s" %(file),header=None)                  
- #               print(filelist)
-  #              print(file)
                 return file,filelist
             except:
- #               print(filelist)
                 print("file doesn't exist")
                 break
         else:
@@ -69,6 +65,10 @@ def region_define(region_select):
     return CellList
 
 def all_region(region_select):
+    '''
+    Reads in a file containing regions and sorts based on the regions. 
+    Each identifier is split into a list of regions.
+    '''
     CellList = []
     reg_file = pd.read_fwf("U:\Research\SnowDepth_Data\Outputs\All\PercentMiss\AllPercent_Depth.txt",header=None)
     
@@ -81,6 +81,9 @@ def all_region(region_select):
         
     
 def get_header(filelist,region_select):
+    '''
+    displays the headers from files and returns the header as well as list of files.
+    '''
     header=[]
     if region_select == "5":
     
@@ -103,6 +106,9 @@ def get_header(filelist,region_select):
 
 
 def pick_var(var):
+    '''
+    Selects the variables from the header of the text file input.
+    '''
     while True:
         input4 = input("Select from the list of columns: ")             
         if input4 in var:
@@ -113,6 +119,9 @@ def pick_var(var):
              print("variable does not exist, try again")       
         
 def row_file(Blacklist,x1,x2):
+    '''
+    Splits and organizes files in range of input rows.    
+    '''
     row_list = []   
     for ij in range(int(x1),int(x2)+1):
          if str(ij) in str(Blacklist):
@@ -122,6 +131,9 @@ def row_file(Blacklist,x1,x2):
     return row_list
 
 def col_file(Blacklist,y1,y2):
+    '''
+    Splits and organizes files in range of input columns.
+    '''
     col_list = []   
     for ij in range(int(y1),int(y2)+1,100):
          if str(ij) in str(Blacklist):
@@ -130,7 +142,10 @@ def col_file(Blacklist,y1,y2):
             col_list.append(str(ij)) 
     return col_list        
 
-def total_file(Blacklist):   
+def total_file(Blacklist):
+    '''
+    Splits and organizes files in range of the entire study area.
+    '''
     CellList = []
     for i in range(12,28):
         for j in range(33,42):
@@ -141,6 +156,9 @@ def total_file(Blacklist):
     return CellList
 
 def title_gen(input3,region):
+    '''
+    Function to generate titles and figure names based on inputs by user.
+    '''
     if input3 == "MonthlyAverage.txt":
         title = "Average Monthly Sum of Snow Depth: Region %s" %(region)
         savefig = "R%sMonthlyDepth" %(region)
@@ -180,6 +198,10 @@ def Set_Month(filelist,header,input3,selection,region_select):               # U
     return figname
     
 def Plot76(filelist,header,plt_index,selection,region_select,input3):           # Added global plotting     
+    '''
+    Work in progress. This contains old code that has not been updated to the 
+    more recent method of plotting. Should still work if needed.
+    '''
     y_list = []
     for fname in filelist:
         try:
@@ -196,12 +218,15 @@ def Plot76(filelist,header,plt_index,selection,region_select,input3):           
     Gen_plot(x,y_list,selection,header,region_select)
     return figname
 
-def Day_mean(filelist,header,plt_index,selection,region_select,input3):                  # Added global plotting    
-   # print(filelist)
+def Day_mean(filelist,header,plt_index,selection,region_select,input3):                  # Added global plotting 
+    '''
+    This function takes in the files requested by the user and creates of an
+    array for all the files. The title and axis are hardcoded in here to speed
+    up the process.
+    '''
     y_list = []
     for fname in filelist:
         data_list = []
-    #    print(fname)
         try:
             for f in fname:
                 data=np.loadtxt(f,skiprows=1)
@@ -210,8 +235,6 @@ def Day_mean(filelist,header,plt_index,selection,region_select,input3):         
             y_list.append(data_list)
         except IOError:
             continue
-   # print(len(y_list))
-  #  print(np.array(data_list).tolist())
     title,yaxis,xaxis,figname = plt_select1(selection,header,data_list,input3,region_select)
     yaxis = "Snow Depth(cm)"
     xaxis = "Day of Year"
@@ -219,6 +242,11 @@ def Day_mean(filelist,header,plt_index,selection,region_select,input3):         
     return figname
     
 def plt_select1(selection,header,data_list,input3,region_select):
+    '''
+    This function determnes whether a title will be generated. For testing 
+    purposes, 'n' is input to produce a generic title and file name that will 
+    be overwritten every time.
+    '''
     fname_lst = []
     generate_title = input("Would you like to generate a title? (y/n): ")    
     if generate_title == "n":
@@ -309,30 +337,28 @@ def Month_plot(title,data_list,header,yaxis,xaxis,input3,region):
 #
         y_2018 = (lin_m*2018) + lin_b
         y_1966 = (lin_m*1966) + lin_b
-        PerROC = ((y_2018 - y_1966)/y_1966) * 100       # Percent Change start to end
+        PerROC = (((y_2018 - y_1966)/y_1966) * 100)/5.2       # Percent Change start to end
         CPD = lin_m * 10                                # Change per Decade
         APC = 100* (math.exp(lin_m)-1)
         
 #            m_round = round(m,3)            
         print('{:.4}'.format(PerROC)+'%','{:.4}'.format(CPD),'{:.4}'.format(APC),'{:.4}'.format(lin_p))
-  #      print(PerROC)
-        
+  #      print(PerROC)        
         sub[i].set_xlim(1966,2017)
         if input3 != "MonthAboveX.txt":
-            sub[i].set_ylim(bottom=0,top=max(per75)+200)
+            sub[i].set_ylim(bottom=0,top=(max(per_90)))
+           # sub[i].set_yticks(range(0,int(max(per_90) + 100),100))
             textstr = '\n'.join((
-                    'Percent Change=%.2f'% (PerROC, )+'%',
-                    '%.2f (cm/decade)' % (CPD, ),
+                    'Change per Decade=%.0f'% (PerROC, )+'%',
+                    '%.1f cm per decade' % (CPD, ),
                     'P-Value= %.2f' % (lin_p, )))
         else:
-            sub[i].set_ylim(bottom=0,top=40)
+            sub[i].set_ylim(bottom=0,top=42)
             sub[i].set_yticks(range(0,31))
             textstr = '\n'.join((
-                    'Percent Change=%.2f'% (PerROC, )+'%',
-                    '%.2f (days/decade)' % (CPD, ),
+                    'Change per Decade=%.0f'% (PerROC, )+'%',
+                    '%.1f days per decade' % (CPD, ),
                     'P-Value= %.2f' % (lin_p, )))            
-
-
         
         sub[i].set_xticks(range(1966,2017,5))#,fontsize=8)
         sub[i].set_xticklabels(range(1966,2017,5),fontsize=10) 
@@ -360,7 +386,11 @@ def Month_plot(title,data_list,header,yaxis,xaxis,input3,region):
            va = "top",ha="right" )
 
 def Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis):
-
+    '''
+    This function is designed to create a plot of daily values. It is tested to
+    work and display all regions (region select of 5). This function operates
+    similarly to the Monthly Plots.
+    '''
    # print(data_list)
     c = color_select()
     for i in range(len(c)):
@@ -476,7 +506,7 @@ def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
 
 
 def savefig(figname):    
-    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.pdf" %(figname))  # Need to vary this formatting between graphics.
+    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.jpg" %(figname),dpi=1000)  # Need to vary this formatting between graphics.
     plt.show()                    
 
 
@@ -547,7 +577,6 @@ def main():
                     if input2.lower() == 'end':
                         break
                     else:        
-        #                CellList = row_file(Blacklist,input1,input2)
                         if selection.lower() == "row":
                             CellList = row_file(Blacklist,input1,input2)
                         elif selection.lower() == "column":
@@ -568,33 +597,22 @@ def main():
             if input3 == "MonthlyAverage.txt":
                 figname = Set_Month(filelist,header,input3,selection,region_select)                
                 savefig(figname)
-                
-#                plt.show()
-#                plt.clf()
             elif input3 == "76SnowDepth.txt":
                 header,plt_index = pick_var(split_line)             # Subplot changes should begin here.           
                 figname = Plot76(filelist,header,plt_index,selection,region_select)
                 savefig(figname)
 
- #               plt.show()
-  #              plt.clf()
             elif input3 == "DaySnowDepth.txt":  # Goal is to get 4 subplots for this file with a plot for each region.
                 header,plt_index = pick_var(split_line)             # Subplot changes should begin here.                         
                 figname = Day_mean(filelist,header,plt_index,selection,region_select,input3)
                 savefig(figname)
-   #             plt.show()
-#                plt.clf()
             elif input3 == "MeanSnowDepth.txt":
                 header,plt_index = pick_var(split_line)             # Subplot changes should begin here.                           
                 figname = SnowDepthMean(filelist,header,plt_index,split_line)
-                savefig(figname)
-                
+                savefig(figname)                
             elif input3== "MonthAboveX.txt":
                 figname = Set_Month(filelist,header,input3,selection,region_select)                
                 savefig(figname)                
-
-#                plt.show()
-#                plt.clf()
         elif input_location == "2":
             selection = input("display row,column,region, all or end?: ")
             if selection == "end":
@@ -628,13 +646,9 @@ def main():
                 col=["i","j","lat","lon","1967-1977","1977-1987","1987-1997",\
                 "1997-2007","2007-2017","DecDif 1-2","DecDif 2-3","DecDif 3-4","DecDif 4-5"]
                 filelist.columns = col
-            #    print(filelist)                
-                Plot_Decade76(filelist,CellList,col)
-        
+                Plot_Decade76(filelist,CellList,col)        
         else:
-        #    input3.close()
             break
-#        plt.figure(figsize=(20,10))
     
 
 
