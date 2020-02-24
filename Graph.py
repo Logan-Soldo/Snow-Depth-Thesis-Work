@@ -1,5 +1,8 @@
 import numpy as np
+import matplotlib.dates
 import matplotlib.pyplot as plt
+#import matplotlib.dates
+from datetime import datetime
 from matplotlib.ticker import AutoMinorLocator
 import pandas as pd
 import math
@@ -161,13 +164,16 @@ def title_gen(input3,region):
     '''
     if input3 == "MonthlyAverage.txt":
         title = "Average Monthly Sum of Snow Depth: Region %s" %(region)
-        savefig = "R%sMonthlyDepth" %(region)
+        savefig = "Monthly\R%sMonthlyDepth" %(region)
     elif input3 == "MonthAboveX.txt":
         title = "Sum of Days Above 2.54cm: Region %s" %(region)
-        savefig = "SOD_R%s" %(region)
+        savefig = "SOD\SOD_R%s" %(region)
     elif input3 == "DaySnowDepth.txt":
         title = "Average Daily Snow Depth: 1966-2018"
         savefig = "DayDepth"
+    elif input3 == "76SnowDepth.txt":
+        title = "Season Length: Region %s" %(region)
+        savefig = "SeasonLength\SL%s" %(region)
 
     xaxis = "test"
     yaxis = "test"
@@ -187,7 +193,7 @@ def Set_Month(filelist,header,input3,selection,region_select):               # U
         except IOError:
             continue
 
-    title,yaxis,xaxis,figname = plt_select1(selection,header,data_list,input3,region_select)
+    title,yaxis,xaxis,figname = plt_select1(selection,header,input3,region_select)
     if input3 != "MonthAboveX.txt":
         yaxis = "Sum of Snow\nDepth(cm)"
         xaxis = "Year"
@@ -214,8 +220,10 @@ def Plot76(filelist,header,plt_index,selection,region_select,input3):           
         except IOError:
             continue
     
-    title,yaxis,xaxis,figname = plt_select1(x,y_list,selection,header,input3,region_select)
-    Gen_plot(x,y_list,selection,header,region_select)
+    title,yaxis,xaxis,figname = plt_select1(selection,header,input3,region_select)
+    yaxis = "Days"
+    xaxis = "Year"
+    Gen_plot(x,y_list,selection,header,region_select,xaxis,yaxis,title)
     return figname
 
 def Day_mean(filelist,header,plt_index,selection,region_select,input3):                  # Added global plotting 
@@ -229,19 +237,19 @@ def Day_mean(filelist,header,plt_index,selection,region_select,input3):         
         data_list = []
         try:
             for f in fname:
-                data=np.loadtxt(f,skiprows=1)
+                data=np.loadtxt(f,skiprows=0)
                 data_list.append(data)
             print(len(data_list))
             y_list.append(data_list)
         except IOError:
             continue
-    title,yaxis,xaxis,figname = plt_select1(selection,header,data_list,input3,region_select)
+    title,yaxis,xaxis,figname = plt_select1(selection,header,input3,region_select)
     yaxis = "Snow Depth(cm)"
     xaxis = "Day of Year"
     Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis)
     return figname
     
-def plt_select1(selection,header,data_list,input3,region_select):
+def plt_select1(selection,header,input3,region_select):
     '''
     This function determnes whether a title will be generated. For testing 
     purposes, 'n' is input to produce a generic title and file name that will 
@@ -410,10 +418,13 @@ def Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis):
 
     for j in y_list:
         y2_list = []
+        y3_list = []
         y=[]
         ymin = []
         ymax= []
-
+        x = []
+        dates = []
+        
     #    plt.xticks(range(1966,2017,5),fontsize=10)
         plt.yticks(fontsize=10)
        # plt.plot(xnew,f2(xnew),color=c[0],label="Average",markevery=100) # change to "Average"?
@@ -421,46 +432,79 @@ def Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis):
         for k in j:
            # print(len(j))
         #    print(i)
-            x=k[:,0]
+            x_pre=k[:,0]
             y_temp = k[:,1]          # plt_index gets its index when variable is chosen by user.
             y2_list.append(y_temp)
             y2_list = np.array(y2_list).tolist()
-            y = np.mean(y2_list,axis=0)
+         #   y3_list = y2_list[181:]+y2_list[:181]
+            y_pre = np.mean(y2_list,axis=0)
             ymin = np.min(y2_list,axis=0)
             ymax = np.max(y2_list,axis=0)
 #            per_90 = np.percentile(y2_list,90,axis=0)
-#            per_10 = np.percentile(y2_list,10,axis=0)
-            per75 = np.percentile(y2_list,75,axis=0)
-            per25 = np.percentile(y2_list,25,axis=0)            
-            
-            regress = linregress(x,y)
+#            per_10 = np.percentile(y2_list,10,axis=0)            
+            regress = linregress(x_pre,y_pre)
             lin_m = regress.slope
             lin_b = regress.intercept
-            lin_r = stats.pearsonr(x,y)
+            lin_r = stats.pearsonr(x_pre,y_pre)
+            
 
-        plt.plot(x,y,color=c[count],label=region_lab,linewidth="2",markevery=100) # change to "Average"?
+        per75 = np.percentile(y2_list,75,axis=0)
+        per75 = np.array(per75).tolist()
+        per75 = per75[181:] + per75[:181]
+        
+        per25 = np.percentile(y2_list,25,axis=0)
+        per25 = np.array(per25).tolist()
+        per25 = per25[181:] + per25[:181]    
+        
+        x_pre = np.array(x_pre).tolist()
+       # print(x_pre)
+        for m in x_pre[181:]:
+            m = '01'+str(int(m))
+          #  print(m)
+            m = datetime.strptime(m,'%y%j')
+            m = m.strftime('%b %d')
+            dates.append(m)
+        for m in x_pre[:181]:
+            m = '02'+str(int(m))
+          #  print(m)
+            m = datetime.strptime(m,'%y%j')
+            m = m.strftime('%b %d')
+            dates.append(m)        
+     #   print(dates)
+        
+      #  x =  matplotlib.dates.date2num(dates)
+        y_pre = np.array(y_pre).tolist()
+        y = y_pre[181:] + y_pre[:181]
+        
+      #  print(x)
+        
+        plt.plot(dates,y,color=c[count],label=region_lab,linewidth="2",markevery=100) # change to "Average"?
         if header != "MeanOfDay":
             plt.plot(x,lin_m*x+lin_b,color=c[j],label="Linear Regression",linewidth="2",linestyle="dashed")   # Regression of average
-        plt.fill_between(x, per25, per75, alpha=0.25, linewidth=0, color=c[count])        
+        plt.fill_between(dates, per25, per75, alpha=0.25, linewidth=0, color=c[count])        
         
         count += 1
-
+ 
+    plt.minorticks_on()
     plt.ylabel(yaxis,fontsize=12)                  # Needs to be changed for every plot.
     plt.xlabel(xaxis,fontsize=12)
-    plt.xticks(range(1,365,10),fontsize=10,rotation=45)
+    plt.xticks(range(0,365,14),fontsize=10,rotation=45)
     plt.yticks(range(0,40,5),fontsize=10)
-    plt.xlim(1,365)
+    plt.xlim(0,365)
     plt.ylim(0,40) 
     plt.legend(fontsize=10)
         
 def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
     y=[]
     fname_lst = []
-    
+
     y_list = np.array(y_list).tolist()
+    print(len(y_list))
     y = np.mean(y_list,axis=0)
     ymin = np.min(y_list,axis=0)
     ymax = np.max(y_list,axis=0)
+    #per_75 = np.percentile(y_list,75,axis=0)
+   # per_25 = np.percentile(y_list,25,axis=0)
     per_90 = np.percentile(y_list,90,axis=0)
     per_10 = np.percentile(y_list,10,axis=0)
     
@@ -468,6 +512,8 @@ def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
     lin_m = regress.slope
     lin_b = regress.intercept
     lin_r = stats.pearsonr(x,y)
+    lin_p = regress.pvalue
+    pval = round(lin_p,2)
 #    r_round = round(r[0],3)
 #    m_round = round(m,3)
 
@@ -475,7 +521,16 @@ def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
     for i in range(len(c)):
         r,g,b = c[i]
         c[i] = (r / 255., g / 255., b / 255.)
-        
+
+    if region == "1":
+        color = c[0]
+    elif region == "2":
+        color = c[1]
+    elif region == "3":
+        color = c[2]
+        #color = "black"
+    elif region == "4":
+        color = c[3]        
 #    f = interp(x,y)
 #    f2 = interp(x,y,kind="cubic")
 #    xnew = np.linspace(1966, 2017,num=1000)
@@ -486,27 +541,32 @@ def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
     plt.figure(figsize=(12,8))    
     plt.title(title,fontsize=12)                    # Plotting title from above
     plt.grid()
- #   plt.tick_params(which="minor",axis="y",direction="inout")
+    plt.minorticks_on()
+    plt.tick_params(which="minor",axis="both",direction="in")
     plt.ylabel(yaxis,fontsize=12)                  # Needs to be changed for every plot.
     plt.xlabel(xaxis,fontsize=12)
-    plt.xticks(range(1,365,10),fontsize=10,rotation=45) 
-    plt.xlim(1,365)
-    plt.ylim(0,max(ymax)+5)
-#    plt.xticks(range(1966,2017,5),fontsize=10)
-    plt.yticks(fontsize=10)
+    plt.xticks(range(1966,2017,5),fontsize=10) 
+    plt.xlim(1966,2017)
+    plt.ylim(0,max(ymax)+10)
+##    plt.xticks(range(1966,2017,5),fontsize=10)
+    plt.yticks(range(0,int(max(ymax))+10,10),fontsize=10)
+     #   plt.yticks(range(0,40,5),fontsize=10)
+
    # plt.plot(xnew,f2(xnew),color=c[0],label="Average",markevery=100) # change to "Average"?
     
-    plt.plot(x,y,color=c[0],label="Average",linewidth="2",markevery=100) # change to "Average"?
+    plt.plot(x,y,color=color,label="Average",linewidth="2",markevery=100) # change to "Average"?
     if header != "MeanOfDay":
-        plt.plot(x,lin_m*x+lin_b,color=c[0],label="Linear Regression",linewidth="2",linestyle="dashed")   # Regression of average
-    plt.fill_between(x, per_10, per_90, alpha=0.25, linewidth=0, color=c[0])
+        plt.plot(x,lin_m*x+lin_b,color="black",label="Linear Regression \nP-Value = %s" %(pval),linewidth="2",linestyle="dashed")   # Regression of average
+    plt.fill_between(x, per_10, per_90, alpha=0.35, linewidth=0, color=color, label= "10th and 90th Percentiles")
+#    plt.fill_between(x, ymin, ymax, alpha=0.35, linewidth=0, color=color)
+
 #    plt.plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
 #    plt.plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
     plt.legend(fontsize=10)
 
 
 def savefig(figname):    
-    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.jpg" %(figname),dpi=1000)  # Need to vary this formatting between graphics.
+    plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.jpg" %(figname),dpi=2000)  # Need to vary this formatting between graphics.
     plt.show()                    
 
 
@@ -599,7 +659,7 @@ def main():
                 savefig(figname)
             elif input3 == "76SnowDepth.txt":
                 header,plt_index = pick_var(split_line)             # Subplot changes should begin here.           
-                figname = Plot76(filelist,header,plt_index,selection,region_select)
+                figname = Plot76(filelist,header,plt_index,selection,region_select,input3)
                 savefig(figname)
 
             elif input3 == "DaySnowDepth.txt":  # Goal is to get 4 subplots for this file with a plot for each region.
