@@ -288,10 +288,13 @@ def Month_plot(title,data_list,header,yaxis,xaxis,input3,region):
     Used for plotting Monthly Data, use this as an example for future
     figures that will require subplots.
     '''
-    fig,sub =  plt.subplots(3, 2, figsize=(12,8),constrained_layout=True)
+    fig,sub =  plt.subplots(6, 1, figsize=(6,14),constrained_layout=False)
+  #  plt.supplots_adjust(top=0.95)
+
 #    plt.figure(figsize=(12,8)) 
     fig.suptitle(title,fontsize=12)                    # Plotting title from above.
-    #fig.autoscale()
+    fig.tight_layout(rect=[0.07, 0.03, 1, 0.97],pad=1.5)    #fig.autoscale()
+  #  plt.tight_layout(h_pad=0.1)
     
     c = color_select()
     for i in range(len(c)):
