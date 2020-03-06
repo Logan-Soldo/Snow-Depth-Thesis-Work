@@ -22,7 +22,7 @@ def read_file(CellList,filelist,region_select,input_location):
         if input_location == "1":
             list_files = ["76SnowDepth.txt","DaySnowDepth.txt","MeanSnowDepth.txt"
                           ,"MonthlyAverage.txt","SDQuality.txt","SeasonalSnowDepth.txt",
-                          "MonthAboveX.txt"]
+                          "MonthAboveX.txt","DaysAboveThreshold.txt"]
             print(list_files)
             file = input("Input a file name: ")               
             try:   
@@ -60,7 +60,7 @@ def region_define(region_select):
     CellList = []
     reg_file = pd.read_fwf("U:\Research\SnowDepth_Data\Outputs\All\PercentMiss\AllPercent_Depth.txt",header=None)
 
-    sort_region = reg_file.loc[reg_file[11] == int(region_select)]
+    sort_region = reg_file.loc[reg_file[10] == int(region_select)]
 #    cell_reg = sort_region[[0,1,11]]
     cell_reg = sort_region[0].astype(str) + sort_region[1].astype(str)  
     CellList = cell_reg.tolist()
@@ -174,6 +174,9 @@ def title_gen(input3,region):
     elif input3 == "76SnowDepth.txt":
         title = "Season Length: Region %s" %(region)
         savefig = "SeasonLength\SL%s" %(region)
+    elif input3 == "DaysAboveThreshold.txt":
+        title = "Days Above Threshold: Region %s"%(region)
+        savefig = "DaysAboveThreshold%s"%(region)
 
     xaxis = "test"
     yaxis = "test"
@@ -202,7 +205,29 @@ def Set_Month(filelist,header,input3,selection,region_select):               # U
         xaxis = "Year"
     Month_plot(title,data_list,header,yaxis,xaxis,input3,region_select)
     return figname
-    
+
+def Set_threshold(filelist,header,input3,selection,region_select):
+    print("need stuff")
+    data_list = []
+    for fname in filelist:
+        try:
+            data= np.loadtxt((open(fname).readlines()[:-1]), skiprows=1, dtype=None)  # Coming out of loop too early, need to build a list of lists.
+           # print(data[0])
+            data_list.append(data)
+        except IOError:
+            continue
+    title,yaxis,xaxis,figname = plt_select1(selection,header,input3,region_select)
+    if input3 != "MonthAboveX.txt":
+        yaxis = "Days Above Threshold"
+        xaxis = "Year"
+    else:
+        yaxis = "Days"
+        xaxis = "Year"
+  #  print(data)
+    threshold_plot(title,data_list,header,yaxis,xaxis,input3,region_select)
+    return figname   
+
+
 def Plot76(filelist,header,plt_index,selection,region_select,input3):           # Added global plotting     
     '''
     Work in progress. This contains old code that has not been updated to the 
@@ -453,21 +478,21 @@ def Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis):
 
         per75 = np.percentile(y2_list,75,axis=0)
         per75 = np.array(per75).tolist()
-        per75 = per75[181:] + per75[:181]
+        per75 = per75[243:] + per75[:243]
         
         per25 = np.percentile(y2_list,25,axis=0)
         per25 = np.array(per25).tolist()
-        per25 = per25[181:] + per25[:181]    
+        per25 = per25[243:] + per25[:243]    
         
         x_pre = np.array(x_pre).tolist()
        # print(x_pre)
-        for m in x_pre[181:]:
+        for m in x_pre[243:]:
             m = '01'+str(int(m))
           #  print(m)
             m = datetime.strptime(m,'%y%j')
             m = m.strftime('%b %d')
             dates.append(m)
-        for m in x_pre[:181]:
+        for m in x_pre[:243]:
             m = '02'+str(int(m))
           #  print(m)
             m = datetime.strptime(m,'%y%j')
@@ -477,9 +502,9 @@ def Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis):
         
       #  x =  matplotlib.dates.date2num(dates)
         y_pre = np.array(y_pre).tolist()
-        y = y_pre[181:] + y_pre[:181]
+        y = y_pre[243:] + y_pre[:243]
         
-      #  print(x)
+       # print(dates[0:303])
         
         plt.plot(dates,y,color=c[count],label=region_lab,linewidth="2",markevery=100) # change to "Average"?
         if header != "MeanOfDay":
@@ -491,9 +516,9 @@ def Day_plot(title,y_list,selection,header,region_select,xaxis,yaxis):
     plt.minorticks_on()
     plt.ylabel(yaxis,fontsize=12)                  # Needs to be changed for every plot.
     plt.xlabel(xaxis,fontsize=12)
-    plt.xticks(range(0,365,14),fontsize=10,rotation=45)
+    plt.xticks(range(0,365,10),fontsize=10,rotation=45)
     plt.yticks(range(0,40,5),fontsize=10)
-    plt.xlim(0,365)
+    plt.xlim(0,303)
     plt.ylim(0,40) 
     plt.legend(fontsize=10)
         
@@ -567,6 +592,115 @@ def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
 #    plt.plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
     plt.legend(fontsize=10)
 
+def threshold_plot(title,data_list,header,yaxis,xaxis,input3,region):
+    print("feed me")
+    fig,sub =  plt.subplots(4, 1, figsize=(6,14),constrained_layout=False)
+  #  plt.supplots_adjust(top=0.95)
+
+#    plt.figure(figsize=(12,8)) 
+    fig.suptitle(title,fontsize=12)                    # Plotting title from above.
+    fig.tight_layout(rect=[0.07, 0.03, 1, 0.97],pad=1.5)    #fig.autoscale()
+  #  plt.tight_layout(h_pad=0.1)
+    
+    c = color_select()
+    for i in range(len(c)):
+        r,g,b = c[i]
+        c[i] = (r / 255., g / 255., b / 255.)
+        
+    depths = ["2.54cm","7.6cm","15.2cm","25.4cm"]
+    sub = sub.ravel()  
+ #   sub = fig.add_subplot(221)
+    if region == "1":
+        color = c[0]
+    elif region == "2":
+        color = c[1]
+    elif region == "3":
+        color = c[2]
+        #color = "black"
+    elif region == "4":
+        color = c[3]
+    
+    print("% Change","CPD","APC","P-Value")    
+    for i in range(4):
+        y_list = []
+        y=[]
+        ymin = []
+        ymax= []
+        for j in data_list:
+            x = j[:,0]
+            y_temp = j[:,i+1]          # plt_index gets its index when variable is chosen by user.
+            y_list.append(y_temp)
+            y_list = np.array(y_list).tolist()
+            
+        y = np.mean(y_list,axis=0)
+        ymin = np.min(y_list,axis=0)
+        ymax = np.max(y_list,axis=0)
+        per_90 = np.percentile(y_list,90,axis=0)
+        per_10 = np.percentile(y_list,10,axis=0)
+        per75 = np.percentile(y_list,75,axis=0)
+        per25 = np.percentile(y_list,25,axis=0)
+        
+        #print(y)
+        regress = linregress(x,y)
+        lin_m = regress.slope
+   #     ROC = (lin_m/np.mean(y))*100   # Likely not the proper method.
+           
+        lin_b = regress.intercept
+#            lin_r = stats.pearsonr(x,y)
+        lin_r = regress.rvalue
+        r_round = round(lin_r,3)
+        lin_p = regress.pvalue
+#        print(lin_m, lin_b,lin_r,lin_p)
+#
+        y_2018 = (lin_m*2018) + lin_b
+        y_1966 = (lin_m*1966) + lin_b
+        PerROC = (((y_2018 - y_1966)/y_1966) * 100)/5.2       # Percent Change start to end
+        CPD = lin_m * 10                                # Change per Decade
+        APC = 100* (math.exp(lin_m)-1)
+        
+#            m_round = round(m,3)            
+        print('{:.4}'.format(PerROC)+'%','{:.4}'.format(CPD),'{:.4}'.format(APC),'{:.4}'.format(lin_p))
+  #      print(PerROC)        
+        sub[i].set_xlim(1966,2017)
+        if input3 != "MonthAboveX.txt":
+            sub[i].set_ylim(bottom=0,top=(max(per_90)+30))
+           # sub[i].set_yticks(range(0,int(max(per_90) + 100),100))
+            textstr = '\n'.join((
+                    'Change per Decade=%.0f'% (PerROC, )+'%',
+                    '%.1f days per decade' % (CPD, ),
+                    'P-Value= %.2f' % (lin_p, )))
+        else:
+            sub[i].set_ylim(bottom=0,top=42)
+            sub[i].set_yticks(range(0,31))
+            textstr = '\n'.join((
+                    'Change per Decade=%.0f'% (PerROC, )+'%',
+                    '%.1f days per decade' % (CPD, ),
+                    'P-Value= %.2f' % (lin_p, )))            
+        
+        sub[i].set_xticks(range(1966,2017,5))#,fontsize=8)
+        sub[i].set_xticklabels(range(1966,2017,5),fontsize=10) 
+        sub[i].locator_params(axis="y",tight=True,nbins=10)   # change nbins integer to reduce number of y ticks
+        sub[i].tick_params(axis="y",labelsize=10)                  # Needs to be changed for every plot.
+        sub[i].xaxis.set_minor_locator(AutoMinorLocator(5))
+        sub[i].set_ylabel(yaxis,fontsize=10,multialignment="center")
+        
+        #  sub[i].labelsize('medium')
+        sub[i].set_title(label=depths[i])
+        sub[i].grid()
+#        sub[i].scatter(x,ymax,s=8,c="black")
+#        sub[i].scatter(x,ymin,s=8,c="black")
+        sub[i].plot(x,y,color=color,label="Average",linewidth="2") # change to "Average"?
+        if header != "MeanOfDay":
+            reg_plot = sub[i].plot(x,lin_m*x+lin_b,color="black",label="R-Value={}".format(r_round),linewidth="2",linestyle="dashed")   # Regression of average
+    #    sub[i].plot(x,ymin,color=c[1],label="Min",linewidth="2",linestyle="dashed")
+     #   sub[i].plot(x,ymax,color=c[1],label="Max",linewidth="2",linestyle="dashed")
+        sub[i].fill_between(x, per25, per75, alpha=0.35, linewidth=0, color=color)
+
+       # sub[i].legend(r_round,reg_plot)
+       # sub[i].legend(plot,reg_plot)
+        props = dict(boxstyle='round', facecolor='white', alpha=0.7)
+        sub[i].text(0.98, 0.95, textstr,transform=sub[i].transAxes,bbox=props,
+           va = "top",ha="right" )
 
 def savefig(figname):    
     plt.savefig("U:\\Research\\GIS\\Maps\\figures\\%s.jpg" %(figname),dpi=2000)  # Need to vary this formatting between graphics.
@@ -675,7 +809,10 @@ def main():
                 savefig(figname)                
             elif input3== "MonthAboveX.txt":
                 figname = Set_Month(filelist,header,input3,selection,region_select)                
-                savefig(figname)                
+                savefig(figname)
+            elif input3 == "DaysAboveThreshold.txt":
+                figname = Set_threshold(filelist,header,input3,selection,region_select)
+                savefig(figname)
         elif input_location == "2":
             selection = input("display row,column,region, all or end?: ")
             if selection == "end":
