@@ -61,8 +61,8 @@
 	  
 	  real  Jan_Mean,Feb_Mean,Mar_Mean,Apr_Mean,May_Mean,Jun_Mean,Jul_Mean,Aug_Mean,Sep_Mean,Oct_Mean
 	  real 	Nov_Mean,Dec_Mean,AvgMaxCount,SumMaxCount
-	  real  per25,per50,per76,per125,per150,tot_snwcover,countGT0(52)
-	  real count25(52),count50(52),count76(52),count100(52),count125(52),range_count(52)
+	  real  per25,per50,per76,per152,per228,tot_snwcover,countGT0(52)
+	  real count25(52),count50(52),count76(52),count152(52),count228(52),range_count(52)
 	  real range_countb(52)
 
 	  real AnnDecadeSum1,AnnDecadeSum2,AnnDecadeSum3,AnnDecadeSum4,AnnDecadeSum5
@@ -77,12 +77,15 @@
 
 	  	  
 	 character(len=500) :: inputfile,inputfile2,outputfile3,outputfile4,outputfile5,&
-	 & outputfile6,outputfile7,outputfile8,outputfile9,outputfile10,outputfile11, &
-	 & outputfile12,outputfile13,outputfile14,outputfile15,outputfile16,outputfile17
+	 & outputfile6,outputfile7,outputfile8,outputfile9,outputfile10,outputfile11,&
+	 & outputfile12,outputfile13,outputfile14,outputfile15,outputfile16,outputfile17,&
+	 & outputfile18,outputfile19
 
 	  namelist /cdh_nml/ inputfile,inputfile2,outputfile3,outputfile4,outputfile5,&
 	 & outputfile6,outputfile7,outputfile8,outputfile9,outputfile10,outputfile11,&
-	 & outputfile12,outputfile13,outputfile14,outputfile15,outputfile16,outputfile17
+	 & outputfile12,outputfile13,outputfile14,outputfile15,outputfile16,outputfile17,&
+	 & outputfile18,outputfile19
+	 
 open(33,file='cdh.nml',status='old')
 read(33,nml=cdh_nml,end=55)
 55 close(33)
@@ -102,17 +105,19 @@ write(*,nml=cdh_nml)
 	  open(34, file=outputfile5,status="replace")            ! 76SnowDepth
 	  open(35, file=outputfile6,status="replace")			 ! SnowDepth Quality
 	  open(38, file=outputfile7,status="replace")			 ! Monthly Percent above x mm
-	  open(40, file=outputfile8,status="replace")			 ! Daily Snow Depth
-	  open(50, file=outputfile9,status="replace")			 ! Monthly Average
-	  open(60, file=outputfile10,status="replace")	  		 ! Seasonal Snow Depth
+	  open(39,file=outputfile8,status="replace")			 ! Days Above Threshold Depths
+	  open(40, file=outputfile9,status="replace")			 ! Daily Snow Depth
+	  open(50, file=outputfile10,status="replace")			 ! Monthly Average
+	  open(60, file=outputfile11,status="replace")	  		 ! Seasonal Snow Depth
 	  ! Writing out "TOTAL" (i.e. all cells in one file) below.
-	  open(80, file=outputfile11,status="replace")			 ! TOTAL Percent missing
-	  open(81, file=outputfile12,status="replace")			 ! TOTAL Percent depth	  
-	  open(82, file=outputfile13,status="replace")			 ! TOTAL Monthly Snow Depth
-	  open(83, file=outputfile14,status="replace")			 ! TOTAL Monthly Snwd GE 76mm
-	  open(84, file=outputfile15,status="replace")			 ! TOTAL Decade Percent GE76mm
-	  open(85, file=outputfile16,status="replace")			 ! TOTAL Decade season length
-	  Open(200,file=outputfile17, status = "replace")		 ! Junk
+	  open(80, file=outputfile12,status="replace")			 ! TOTAL Percent missing
+	  open(81, file=outputfile13,status="replace")			 ! TOTAL Percent depth	  
+	  open(82, file=outputfile14,status="replace")			 ! TOTAL Monthly Snow Depth
+	  open(83, file=outputfile15,status="replace")			 ! TOTAL Monthly Snwd GE 76mm
+	  open(84, file=outputfile16,status="replace")			 ! TOTAL Decade Percent GE76mm
+	  open(85, file=outputfile17,status="replace")			 ! TOTAL Decade season length
+	  open(86, file=outputfile18,status="replace")			 ! TOTAL Monthly Percentage of cover above 1in
+	  Open(200,file=outputfile19, status = "replace")		 ! Junk
 !	  open(50,file = outputfile3,status = "replace")
 	  
 
@@ -283,8 +288,8 @@ write(*,nml=cdh_nml)
 		count25(k) = 0
 		count50(k) = 0
 		count76(k) = 0
-		count100(k) = 0 
-		count125(k) = 0
+		count152(k) = 0 
+		count228(k) = 0
 		
 		range_count(k) = 0.0
 		
@@ -303,7 +308,10 @@ write(*,nml=cdh_nml)
 		write(34,3410) "year","76Count","76Percent","MaxAbove76","First7day","Last7Days","DaysAbove76","flag"
 		write(35,3510) "year","Zero Count","Zero Percent","7.6 Count","7.6 Percent","Miss Count","Miss Percent"
 		write(38,3820) "year","Nov","Dec","Jan","Feb","Mar","Apr"
+		write(39,3910) "year","22.8","15.2","7.6","2.54"
 		write(50,5100) "year","Nov","Dec","Jan","Feb","Mar","Apr"
+
+		
 		! write(80,3610) "i","j","lat","lon","Miss Percent","Miss Count","Percent_76","Counter_76",&
 		! &"AvgMaxJulian","total_counter","max_reporting"     !percent missing is wrtitten out here. 
 		start_year = 1965				
@@ -322,8 +330,8 @@ write(*,nml=cdh_nml)
 		per25 = 0
 		per50 = 0
 		per76 = 0
-		per125 = 0
-		per150 = 0
+		per152 = 0
+		per228 = 0
 ! Initialize months
 
 		
@@ -386,14 +394,8 @@ write(*,nml=cdh_nml)
 					   
 
 						do l=1,366
-						!	write(200,*) "in leap"
 							total_counter = total_counter + 1
-
-!!!							write(200,*) total_counter,year,month,day,julian,count_day
 							if (mean_depth .NE. -99999) then
-								! if (julian .eq. 60) then
-									! leap_count = leap_count + 1
-								! endif
 								Non_miss_days(k) = Non_miss_days(k) + 1
 								Depth_mean(k) = Depth_mean(k) + mean_depth
 								if (mean_depth .gt. max_mean(k)) then
@@ -531,23 +533,24 @@ write(*,nml=cdh_nml)
 									if (mean_depth .gt. 0) then
 										countGT0(k) = countGT0(k) + 1
 									endif
-									if (mean_depth .ge. 25) then
-										count25(k) = count25(k) + 1
-									endif
 									if (mean_depth .ge. 50) then
 										count50(k) = count50(k) + 1
 									endif
-									if ((count_day .GE. 154) .and. (count_day .LE. 275)) then  ! 7.6cm starts in November ends March 31st based on monthly analysis.
+									if ((count_day .GE. 154) .and. (count_day .LE. 275)) then  ! 7.6cm starts in December ends March 31st based on monthly analysis.
+										if (mean_depth .ge. 25.4) then 				! 1 inch
+											count25(k) = count25(k) + 1
+										endif
 										if (mean_depth .ge. 76) then
 											count76(k) = count76(k) + 1
+										endif									
+										if (mean_depth .ge. 152.4) then					! 152.4 = 15.24cm or 6inches
+											count152(k) = count152(k) + 1
+										endif
+										if (mean_depth .ge. 254) then					! 254 = 254cm or 10inches
+											count228(k) = count228(k) + 1
 										endif
 										range_count(k) = range_count(k) + 1
-									endif
-									if (mean_depth .ge. 100) then
-										count100(k) = count100(k) + 1
-									endif
-									if (mean_depth .ge. 125) then
-										count125(k) = count125(k) + 1
+
 									endif
 									range_countb(k) = range_countb(k) + 1   ! Counting number of days between November and end of March.
 								endif			
@@ -582,7 +585,6 @@ write(*,nml=cdh_nml)
 									endif
 									Last7day(k) = count_day - 1     ! This records the last 7 day period where snow is above 7.6 cm.
 								endif
-								!DaysAbove76 = 0								! Days above is reset
 							endif
 							
 							if (station_num .gt. max_reporting(k)) then
@@ -605,9 +607,6 @@ write(*,nml=cdh_nml)
 									abs_min_elevation(k) = min_elevation
 								endif
 							endif
-														
-
-						
 							
 						read(25,1500,end=25)Datestring,year,month,day,julian,count_day,i,j,longitude,latitude,&    ! Check if this read is correct...
 						&max_elevation,min_elevation,mean_depth,median_depth,station_num,station_10,&
@@ -637,18 +636,18 @@ write(*,nml=cdh_nml)
 						percent_76(k) = (counter_76(k)/365.0)*100
 						miss_percent(k) = (miss_counter(k)/365.0)*100							
 						
-						Jan_total = Jan_total*0.1      ! Converting to cm.
-						Feb_total = Feb_total*0.1
-						Mar_total = Mar_total*0.1
-						Apr_total = Apr_total*0.1
-						May_total = May_total*0.1
-						Jun_total = Jun_total*0.1
-						Jul_total = Jul_total*0.1
-						Aug_total = Aug_total*0.1
-						Sep_total = Sep_total*0.1
-						Oct_total = Oct_total*0.1
-						Nov_total = Nov_total*0.1
-						Dec_total = Dec_total*0.1
+						Jan_total(k) = Jan_total(k)*0.1      ! Converting to cm.
+						Feb_total(k) = Feb_total(k)*0.1
+						Mar_total(k) = Mar_total(k)*0.1
+						Apr_total(k) = Apr_total(k)*0.1
+						May_total(k) = May_total(k)*0.1
+						Jun_total(k) = Jun_total(k)*0.1
+						Jul_total(k) = Jul_total(k)*0.1
+						Aug_total(k) = Aug_total(k)*0.1
+						Sep_total(k) = Sep_total(k)*0.1
+						Oct_total(k) = Oct_total(k)*0.1
+						Nov_total(k) = Nov_total(k)*0.1
+						Dec_total(k) = Dec_total(k)*0.1
 						
 						
 						write(30,3000) study_year,k,Depth_mean(k), max_mean(k),&
@@ -665,6 +664,7 @@ write(*,nml=cdh_nml)
 									
 						write(38,3800)study_year,Nov_zdepth(k),Dec_zdepth(k),Jan_zdepth(k),Feb_zdepth(k),&
 									&Mar_zdepth(k),Apr_zdepth(k)
+						write(39,3900) study_year,count228(k),count152(k),count76(k),count25(k)
 									
 						study_year = study_year + 1
 					enddo ! end year loop						
@@ -707,16 +707,16 @@ write(*,nml=cdh_nml)
 		
 		tot_snwcover = ((sum(countGT0,k))/(sum(range_count,k)))*100
 		
-		per25 = ((sum(count25,k))/(sum(range_countb,k)))*100
+		per25 = ((sum(count25,k))/(sum(range_count,k)))*100
 		per50 = ((sum(count50,k))/(sum(range_countb,k)))*100
 		per76 = ((sum(count76,k))/(sum(range_count,k)))*100
-		per125 = ((sum(count100,k))/(sum(range_count,k)))*100
-		per150 = ((sum(count125,k))/(sum(range_count,k)))*100
+		per152 = ((sum(count152,k))/(sum(range_count,k)))*100
+		per228 = ((sum(count228,k))/(sum(range_count,k)))*100
 		sum_range = sum(range_count,k)		! For December to March
 		sum_rangeb = sum(range_countb,k)
 		
 		AbsAverageElevation = (sum(AvgElevation,k))/k
-!		write(200,*) i,j,latitude,longitude,sum(range_count,k),sum(count125,k)
+!		write(200,*) i,j,latitude,longitude,sum(range_count,k),sum(count228,k)
 		
 		if (per76 .lt. 25) then
 			region = 1
@@ -733,7 +733,7 @@ write(*,nml=cdh_nml)
 		write(80,3600) i,j,latitude,longitude,AbsAverageElevation,total_mpercent,miss_total,annPercent_76,annCounter_76,avg_max_mean,&
 		&AvgMaxCount,abs_max,max_year,AvgFst7day,AvgLst7day,AvgFstLstDiff,sumflag,total_counter,total_max_reporting,&
 		TotalZeroReportYears,TotalReporting25  !	percent missing is wrtitten out here. 
-		write(81,3700) i,j,latitude,longitude,sum_range,tot_snwcover,per25,per50,per76,per125,per150,region
+		write(81,3700) i,j,latitude,longitude,sum_range,tot_snwcover,per25,per76,per152,per228,region
 
 ! Write out the monthly averages here.
 		Jan_Mean = (sum(Jan_total,k))/k
@@ -748,6 +748,7 @@ write(*,nml=cdh_nml)
 		Oct_Mean = (sum(Oct_total,k))/k
 		Nov_Mean = (sum(Nov_total,k))/k
 		Dec_Mean = (sum(Dec_total,k))/k
+				
 		
 		Jan_zmean = ((sum(Jan_zdepth,k))/(sum(Jan_count,k)))*100
 		Feb_zmean = ((sum(Feb_zdepth,k))/(sum(Feb_count,k)))*100
@@ -846,10 +847,13 @@ write(83,8200) i,j,latitude,longitude,Jan_zzmean,Feb_zzmean,Mar_zzmean,Apr_zzmea
 &Jun_zzmean,Jul_zzmean,Aug_zzmean,Sep_zzmean,Oct_zzmean,Nov_zzmean,Dec_zzmean
 
 write(84,8400) i,j,latitude,longitude,DMDecadeSum1,DMDecadeSum2,DMDecadeSum3,DMDecadeSum4,DMDecadeSum5,&
-&DMDecadeDif_1,DMDecadeDif_2,DMDecadeDif_3,DMDecadeDif_4,DMDecadeDif_5
+&DMDecadeDif_1,DMDecadeDif_2,DMDecadeDif_3,DMDecadeDif_4,DMDecadeDif_5,region
 
 write(85,8400) i,j,latitude,longitude,SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLDecadeSum4,SLDecadeSum5,&
-&SLDecadeDif_1,SLDecadeDif_2,SLDecadeDif_3,SLDecadeDif_4,SLDecadeDif_5
+&SLDecadeDif_1,SLDecadeDif_2,SLDecadeDif_3,SLDecadeDif_4,SLDecadeDif_5,region
+
+write(86,8600) i,j,region,Nov_zmean,Nov_Mean,Dec_zmean,Dec_Mean,Jan_zmean,Jan_Mean,Feb_zmean,Feb_Mean,Mar_zmean,&
+&Mar_Mean,Apr_zmean,Apr_Mean
 		
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -917,17 +921,21 @@ write(85,8400) i,j,latitude,longitude,SLDecadeSum1,SLDecadeSum2,SLDecadeSum3,SLD
  3500 format(I8,6(f16.2))
  3600 format(2(I5),2(f14.6),I6,4(f14.3),I14,f14.2,5(I14),2(f14.1),3(I6))
  3610 format(2(a5),2(a14),5(a14),a14,a14)
- 3700 format(2(I5),2(f12.4),I8,6(f8.2),I8)
+ 3700 format(2(I5),2(f12.4),I8,5(f8.2),I8)
  3800 format(I14,12(f14.2))
  3810 format(a14,12(f14.2))
  3820 format(13(a14))
+ 3910 format(a5,5a10)
+ 3900 format(I5,4f10.2)
  4000 format(I11,2(f15.3),I8)
  4100 format(a11,2(a15))
  5000 format(I10,10(f10.2))
  5100 format(11(a10))
  5010 format(a10,10(f10.2))
  8200 format(2(I5),2(f12.4),12(f12.2))
- 8400 format(2(I5),2(f12.4),10(f12.2))
+ 8400 format(2(I5),2(f12.4),10(f12.2),I5)
+ 8600 format(3(I5),12(f12.2))
+ 8610 format(2(a5),12(a12))
  !5100 format(a12,a6,2(a14))
 
 
