@@ -94,16 +94,18 @@ outputfile4="${fileout4}${i}${j}_MaxReporting.txt",
 outputfile5="${fileout}${i}${j}_76SnowDepth.txt",
 outputfile6="${fileout}${i}${j}_SDQuality.txt",
 outputfile7="${fileout}${i}${j}_MonthAboveX.txt",
-outputfile8="${fileout}${i}${j}_DaySnowDepth.txt",
-outputfile9="${fileout}${i}${j}_MonthlyAverage.txt",
-outputfile10="${fileout}${i}${j}_SeasonalSnowDepth.txt",
-outputfile11="${fileout2}${i}${j}_PercentMiss.txt",
-outputfile12="${fileout2}${i}${j}_PercentDepth.txt",
-outputfile13="${fileout2}${i}${j}_PercentMonthlySD.txt",
-outputfile14="${fileout2}${i}${j}_PercentMonthy76.txt",
-outputfile15="${fileout2}${i}${j}_DecadeSum76.txt",
-outputfile16="${fileout2}${i}${j}_DecadeSL.txt",
-outputfile17="${fileout3}${i}${j}_Junk.txt",
+outputfile8="${fileout}${i}${j}_DaysAboveThreshold.txt",
+outputfile9="${fileout}${i}${j}_DaySnowDepth.txt",
+outputfile10="${fileout}${i}${j}_MonthlyAverage.txt",
+outputfile11="${fileout}${i}${j}_SeasonalSnowDepth.txt",
+outputfile12="${fileout2}${i}${j}_PercentMiss.txt",
+outputfile13="${fileout2}${i}${j}_PercentDepth.txt",
+outputfile14="${fileout2}${i}${j}_PercentMonthlySD.txt",
+outputfile15="${fileout2}${i}${j}_PercentMonthy76.txt",
+outputfile16="${fileout2}${i}${j}_DecadeSum76.txt",
+outputfile17="${fileout2}${i}${j}_DecadeSL.txt",
+outputfile18="${fileout2}${i}${j}_MonthlyCover.txt",
+outputfile19="${fileout3}${i}${j}_Junk.txt",
 /
 EOF
 
@@ -133,6 +135,8 @@ EOF
 	rm -r $outputdir/All/PercentMiss/All*.txt
 	rm -r $outputdir/All/PercentMiss/DecadeSL_All.txt
 	rm -r $outputdir/All/MaxReporting/MaxReporting.txt
+	rm -r $outputdir/All/PercentMiss/AvgMonthlyCover.txt
+
 	
 	cat $outputdir/All/PercentMiss/*_PercentMiss.txt >> $outputdir/All/PercentMiss/AllPercent_missing.txt
 	cat $outputdir/All/PercentMiss/*_PercentDepth.txt >> $outputdir/All/PercentMiss/AllPercent_Depth.txt
@@ -140,6 +144,8 @@ EOF
 	cat $outputdir/All/PercentMiss/*_PercentMonthy76.txt >> $outputdir/All/PercentMiss/AllPercent_Monthly76.txt
    	cat $outputdir/All/PercentMiss/*_DecadeSum76.txt >> $outputdir/All/PercentMiss/AllPercent_Decade76.txt
 	cat $outputdir/All/PercentMiss/*_DecadeSL.txt >> $outputdir/All/PercentMiss/DecadeSL_All.txt
+	cat $outputdir/All/PercentMiss/*_MonthlyCover.txt >> $outputdir/All/PercentMiss/AvgMonthlyCover.txt
+	
 	
 	paste -d "," $outputdir/All/MaxReporting/*_MaxReporting.txt >> $outputdir/All/MaxReporting/MaxReporting.txt
 
@@ -149,6 +155,7 @@ EOF
 	rm $outputdir/All/PercentMiss/*_PercentMonthy76.txt
 	rm $outputdir/All/PercentMiss/*_DecadeSum76.txt
 	rm $outputdir/All/PercentMiss/*_DecadeSL.txt
+	rm $outputdir/All/PercentMiss/*_MonthlyCover.txt
 
 #rm -f data1.bin
 
