@@ -175,7 +175,7 @@ def title_gen(input3,region):
         title = "Season Length: Region %s" %(region)
         savefig = "SeasonLength\SL%s" %(region)
     elif input3 == "DaysAboveThreshold.txt":
-        title = "Days Above Threshold: Region %s"%(region)
+        title = "Yearly Variation in Days Above a Snow Depth Threshold: Region %s"%(region)
         savefig = "DaysAboveThreshold%s"%(region)
 
     xaxis = "test"
@@ -594,12 +594,12 @@ def Gen_plot(x,y_list,selection,header,region,xaxis,yaxis,title):
 
 def threshold_plot(title,data_list,header,yaxis,xaxis,input3,region):
     print("feed me")
-    fig,sub =  plt.subplots(4, 1, figsize=(6,14),constrained_layout=False)
+    fig,sub =  plt.subplots(4, 1, figsize=(8,10),constrained_layout=False)
   #  plt.supplots_adjust(top=0.95)
 
 #    plt.figure(figsize=(12,8)) 
     fig.suptitle(title,fontsize=12)                    # Plotting title from above.
-    fig.tight_layout(rect=[0.07, 0.03, 1, 0.97],pad=1.5)    #fig.autoscale()
+    fig.tight_layout(rect=[0.07, 0.03, 1, 0.97],pad=2.0)    #fig.autoscale()
   #  plt.tight_layout(h_pad=0.1)
     
     c = color_select()
@@ -607,7 +607,7 @@ def threshold_plot(title,data_list,header,yaxis,xaxis,input3,region):
         r,g,b = c[i]
         c[i] = (r / 255., g / 255., b / 255.)
         
-    depths = ["2.54cm","7.6cm","15.2cm","25.4cm"]
+    depths = ["25.4cm","15.2cm","7.6cm","2.54cm"]
     sub = sub.ravel()  
  #   sub = fig.add_subplot(221)
     if region == "1":
@@ -663,7 +663,7 @@ def threshold_plot(title,data_list,header,yaxis,xaxis,input3,region):
   #      print(PerROC)        
         sub[i].set_xlim(1966,2017)
         if input3 != "MonthAboveX.txt":
-            sub[i].set_ylim(bottom=0,top=(max(per_90)+30))
+            sub[i].set_ylim(bottom=0,top=(max(per_90)+50))
            # sub[i].set_yticks(range(0,int(max(per_90) + 100),100))
             textstr = '\n'.join((
                     'Change per Decade=%.0f'% (PerROC, )+'%',
