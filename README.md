@@ -7,7 +7,14 @@ Note that Python is not a part of the master branch as it is only used for figur
 
 Sample figures include:
 
+Seasonal Progression of Snow Depth
 
 ![Seasonal Progression of Snow Depth](https://github.com/Logan-Soldo/SnowDepth/blob/Python/Figures/SeasonalProgression.png)
+
+Time-Series Threshold Depths
+
 ![Time-Series Threshold Depths](https://github.com/Logan-Soldo/SnowDepth/blob/Python/Figures/Region4DepthDifferences.png)
+
+Time-Series Extent vs. Depth
+
 ![Time-Series Extent vs. Depth](https://github.com/Logan-Soldo/SnowDepth/blob/Python/Figures/Region4ExtentvsDepth.png)
