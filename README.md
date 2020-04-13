@@ -7,7 +7,7 @@ Note that Python is not a part of the master branch as it is only used for figur
 
 Workflow:
 
-![workflow]
+![workflow](https://github.com/Logan-Soldo/SnowDepth/blob/master/Workflow.jpg)
 
 
 
