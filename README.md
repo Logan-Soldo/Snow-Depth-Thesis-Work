@@ -5,6 +5,12 @@ Thesis work for Snow Depth Climatology over Central North America from 1966-2018
 The repository is split into sections based on the language used (i.e. Fortran90, Bash, or Python).
 Note that Python is not a part of the master branch as it is only used for figure creation and additional statistics.
 
+Workflow:
+
+![workflow]
+
+
+
 Sample figures include:
 
 Seasonal Progression of Snow Depth
