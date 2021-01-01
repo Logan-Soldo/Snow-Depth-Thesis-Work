@@ -308,7 +308,7 @@ write(*,nml=cdh_nml)
 		write(34,3410) "year","76Count","76Percent","MaxAbove76","First7day","Last7Days","DaysAbove76","flag"
 		write(35,3510) "year","Zero Count","Zero Percent","7.6 Count","7.6 Percent","Miss Count","Miss Percent"
 		write(38,3820) "year","Nov","Dec","Jan","Feb","Mar","Apr"
-		write(39,3910) "year","22.8","15.2","7.6","2.54"
+		write(39,3910) "year","22.8cm","15.2cm","7.6cm","2.54cm"
 		write(50,5100) "year","Nov","Dec","Jan","Feb","Mar","Apr"
 
 		
