@@ -27,13 +27,14 @@
  #set -x
 
 ##### Home Directory ######
-#datadir=/mnt/e/School/Thesis/SnowDepth_Data/Outputs
-#outputdir=/mnt/e/School/Thesis/SnowDepth_Data/Outputs
+datadir=/mnt/g/School/Thesis/Research/SnowDepth_Data/Outputs
+datadir2=/mnt/g/School/Thesis/Research/Snowfall_Data/Outputs
+outputdir=/mnt/g/School/Thesis/Research/SnowDepth_Data/Outputs
 
 ##### School Directory ######
-datadir=/mnt/u/Research/SnowDepth_Data/Outputs
-datadir2=/mnt/u/Research/Snowfall_Data/Outputs
-outputdir=/mnt/u/Research/SnowDepth_Data/Outputs
+# datadir=/mnt/u/Research/SnowDepth_Data/Outputs
+# datadir2=/mnt/u/Research/Snowfall_Data/Outputs
+# outputdir=/mnt/u/Research/SnowDepth_Data/Outputs
 
 
 start_time=$(date +%s)
